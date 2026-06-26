@@ -831,7 +831,7 @@
   function eventHtml(ev) {
     var sigBadge = ev.signatureValid === false ? ' <span class="badge warn" title="' + escAttr(t("events.sigBadTitle")) + '">' + esc(t("events.sigBad")) + "</span>" : "";
     var isNew = newIds[ev.id] ? " event-new" : "";
-    return '<div class="event event-' + esc(ev.product) + isNew + '">' +
+    return '<div class="event event-' + esc(ev.product) + isNew + '" data-evid="' + escAttr(ev.id) + '">' +
         '<span class="ev-rail"></span>' +
         '<span class="ev-time" title="' + escAttr(fmtAbs(ev.ts)) + '">' + esc(timeAgo(ev.ts)) + "</span>" +
         '<div class="ev-main">' +
@@ -873,9 +873,7 @@
     el.querySelectorAll(".event details[open]").forEach(function (d) {
       var ev = d.closest(".event"); if (ev) openIds[ev.dataset.evid] = true;
     });
-    el.innerHTML = pageList.map(function (ev) {
-      return eventHtml(ev).replace('<div class="event ', '<div data-evid="' + escAttr(ev.id) + '" class="event ');
-    }).join("") + pager;
+    el.innerHTML = pageList.map(eventHtml).join("") + pager;
     el.querySelectorAll(".event[data-evid]").forEach(function (node) {
       if (openIds[node.dataset.evid]) { var d = node.querySelector("details"); if (d) d.open = true; }
     });
