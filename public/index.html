@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>HUB RW</title>
+  <link rel="icon" href="/favicon.ico" />
+  <script>(function(){try{var s=localStorage.getItem('hub_theme');var d=s?s==='dark':(window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches);if(d)document.documentElement.setAttribute('data-theme','dark');}catch(e){}})();</script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/styles.css" />
+</head>
+<body>
+
+  <!-- ── Login ─────────────────────────────────────────────── -->
+  <div id="login" class="login-wrap hidden">
+    <div class="login-card">
+      <div class="login-logo"><img src="/assets/hub-rw-icon.svg" alt="HUB RW" /></div>
+      <div class="brand" id="loginBrand">HUB RW</div>
+      <div class="sub" data-i18n="login.subtitle">Painel de conexão de canais Meta</div>
+      <form id="loginForm">
+        <input type="password" id="loginPass" autocomplete="current-password" data-i18n-ph="login.password" data-i18n-aria="login.password" />
+        <div class="err" id="loginErr" role="alert"></div>
+        <button class="btn" id="loginBtn" type="submit" style="width:100%" data-i18n="login.enter">Entrar</button>
+      </form>
+      <div class="login-foot">
+        <img src="/assets/hub-rw-logo.svg" alt="HUB RW" style="height:34px;margin:0 auto .6rem;display:block" />
+        <div id="loginFoot"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Welcome (initial screen) ──────────────────────────── -->
+  <div id="welcome" class="welcome-wrap hidden">
+    <div class="welcome-card">
+      <div class="wc-logo"><img src="/assets/hub-rw-icon.svg" alt="HUB RW" /></div>
+      <h1 data-i18n="welcome.title">HUB RW Meta Hub</h1>
+      <p class="wc-lead" data-i18n="welcome.lead">Conecte WhatsApp Business, Messenger e Instagram e acompanhe os webhooks em tempo real.</p>
+      <div class="wc-channels">
+        <span class="wc-ch"><img src="/assets/waba.png" alt="" /> WhatsApp</span>
+        <span class="wc-ch"><img src="/assets/messenger.png" alt="" /> Messenger</span>
+        <span class="wc-ch"><img src="/assets/instagram.png" alt="" /> Instagram</span>
+      </div>
+      <button class="wc-enter" id="welcomeEnter" type="button"><span data-i18n="welcome.enter">Acessar o painel</span> <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg></button>
+      <div class="wc-foot" data-i18n="welcome.foot">HUB RW</div>
+    </div>
+  </div>
+
+  <!-- ── App ───────────────────────────────────────────────── -->
+  <div id="app" class="hidden">
+    <div class="layout">
+
+      <!-- Sidebar -->
+      <aside class="sidebar">
+        <div class="side-brand">
+          <div class="logo"><img src="/assets/hub-rw-icon.svg" alt="HUB RW" /></div>
+          <button class="side-brand-text" id="brandHome" type="button" data-i18n-aria="welcome.enter">
+            <div class="side-title" id="brandName">HUB RW</div>
+            <div class="side-sub" data-i18n="side.by">HUB RW</div>
+          </button>
+        </div>
+
+        <div class="nav-label" data-i18n="nav.groupMonitor">Monitorar</div>
+        <nav class="side-nav" data-i18n-aria="nav.aria">
+          <button data-tab="overview" class="active" data-i18n-aria="nav.overview" aria-current="page">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="7" height="9" x="3" y="3" rx="1"/><rect width="7" height="5" x="3" y="16" rx="1"/><rect width="7" height="9" x="14" y="12" rx="1"/><rect width="7" height="5" x="14" y="3" rx="1"/></svg>
+            <span class="lbl" data-i18n="nav.overview">Visão geral</span>
+          </button>
+          <button data-tab="events" data-i18n-aria="nav.events">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+            <span class="lbl" data-i18n="nav.events">Interações</span>
+          </button>
+          <button data-tab="channels" data-i18n-aria="nav.channels">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+            <span class="lbl" data-i18n="nav.channels">Canais</span>
+            <span class="nav-count" id="navCountChannels" hidden></span>
+          </button>
+        </nav>
+
+        <div class="side-sep"></div>
+        <div class="nav-label" data-i18n="nav.groupManage">Gerenciar</div>
+        <nav class="side-nav">
+          <button data-tab="apps" data-i18n-aria="nav.apps">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>
+            <span class="lbl" data-i18n="nav.apps">Apps</span>
+            <span class="nav-count" id="navCountApps" hidden></span>
+          </button>
+          <button data-tab="config" data-i18n-aria="nav.config">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+            <span class="lbl" data-i18n="nav.config">Configuração</span>
+          </button>
+        </nav>
+
+        <div class="side-sep"></div>
+        <div class="nav-label" data-i18n="nav.groupResources">Recursos</div>
+        <nav class="side-nav">
+          <button data-tab="guide" data-i18n-aria="nav.guide">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 7v14"/><path d="M3 18a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h5a4 4 0 0 1 4 4 4 4 0 0 1 4-4h5a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1h-6a3 3 0 0 0-3 3 3 3 0 0 0-3-3z"/></svg>
+            <span class="lbl" data-i18n="nav.guide">Guia</span>
+          </button>
+          <button data-tab="evidence" data-i18n-aria="nav.evidence">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+            <span class="lbl" data-i18n="nav.evidence">Evidências</span>
+          </button>
+        </nav>
+
+        <div class="side-spacer"></div>
+
+        <div class="side-promo">
+          <img class="hub-rw-logo-dark" src="/assets/hub-rw-logo-dark.svg" alt="HUB RW" />
+          <div class="promo-text" data-i18n="side.promo">Centralize OAuth, webhooks e encaminhamentos dos canais Meta em um painel operacional.</div>
+        </div>
+      </aside>
+
+      <!-- Content -->
+      <div class="content">
+        <header class="topbar">
+          <div class="left">
+            <div class="page-title" id="pageTitle">Visão geral</div>
+          </div>
+          <div class="right">
+            <span class="status-dot" id="liveStatus" data-i18n="topbar.monitoring">monitorando</span>
+            <button class="cmdk-btn" id="cmdkBtn" data-i18n-aria="cmdk.open">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+              <span data-i18n="cmdk.search">Buscar</span>
+              <span class="kbd" id="cmdkHint">Ctrl K</span>
+            </button>
+            <div class="lang-dd" id="langDD">
+              <button type="button" class="lang-dd-btn" id="langDDBtn" aria-haspopup="listbox" aria-expanded="false" data-i18n-aria="topbar.lang"><span id="langDDCur"></span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
+              <ul class="lang-dd-menu" id="langDDMenu" role="listbox"></ul>
+            </div>
+            <button class="btn icon-btn" id="themeBtn" data-i18n-title="topbar.theme" data-i18n-aria="topbar.theme"></button>
+            <button class="btn ghost" id="logoutBtn" data-i18n="topbar.logout">Sair</button>
+          </div>
+        </header>
+
+        <main>
+          <!-- ── Overview tab ─────────────────────────────────── -->
+          <section id="tab-overview">
+            <div class="bento">
+              <div class="col-3">
+                <div class="kpi">
+                  <div class="kpi-top">
+                    <div class="kpi-ico apps"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="7" height="7" x="3" y="3" rx="1"/><rect width="7" height="7" x="14" y="3" rx="1"/><rect width="7" height="7" x="14" y="14" rx="1"/><rect width="7" height="7" x="3" y="14" rx="1"/></svg></div>
+                  </div>
+                  <div class="kpi-num tnum" id="statApps">–</div>
+                  <div class="kpi-lbl" data-i18n="stats.apps">Apps</div>
+                </div>
+              </div>
+              <div class="col-3">
+                <div class="kpi">
+                  <div class="kpi-top">
+                    <div class="kpi-ico chan"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22v-5"/><path d="M9 8V2"/><path d="M15 8V2"/><path d="M18 8v5a4 4 0 0 1-4 4h-4a4 4 0 0 1-4-4V8Z"/></svg></div>
+                  </div>
+                  <div class="kpi-num tnum" id="statChannels">–</div>
+                  <div class="kpi-lbl" data-i18n="stats.channels">Canais conectados</div>
+                  <div class="kpi-foot" id="kpiSubscribed"></div>
+                </div>
+              </div>
+              <div class="col-3">
+                <div class="kpi">
+                  <div class="kpi-top">
+                    <div class="kpi-ico evt"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg></div>
+                    <span class="kpi-trend flat" id="kpiEventsTrend"></span>
+                  </div>
+                  <div class="kpi-num tnum" id="statEvents">–</div>
+                  <div class="kpi-lbl" data-i18n="stats.events">Interações (1h)</div>
+                  <div class="kpi-spark" id="kpiEventsSpark"></div>
+                </div>
+              </div>
+              <div class="col-3">
+                <div class="kpi">
+                  <div class="kpi-top">
+                    <div class="kpi-ico fwd"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" x2="15.42" y1="13.51" y2="17.49"/><line x1="15.41" x2="8.59" y1="6.51" y2="10.49"/></svg></div>
+                  </div>
+                  <div class="kpi-num tnum" id="statForwards">–</div>
+                  <div class="kpi-lbl" data-i18n="stats.forwards">Encaminhamentos (1h)</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="bento">
+              <div class="col-8">
+                <div class="card">
+                  <div class="card-head">
+                    <div>
+                      <div class="panel-eyebrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="m19 9-5 5-4-4-3 3"/></svg><span data-i18n="overview.activity">Atividade — última hora</span></div>
+                    </div>
+                    <span class="chart-cap" id="activityPeak"></span>
+                  </div>
+                  <div id="activityChart" class="chart-wrap"></div>
+                </div>
+              </div>
+              <div class="col-4">
+                <div class="card">
+                  <div class="panel-eyebrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v10l8-5"/><circle cx="12" cy="12" r="10"/></svg><span data-i18n="overview.mix">Mix de canais</span></div>
+                  <div id="channelMix"></div>
+                </div>
+              </div>
+            </div>
+
+            <div class="bento">
+              <div class="col-7">
+                <div class="card">
+                  <div class="card-head">
+                    <div class="panel-eyebrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 8v4l3 3"/><circle cx="12" cy="12" r="10"/></svg><span data-i18n="overview.recent">Interações recentes</span></div>
+                    <button class="btn ghost tiny" id="ovSeeConsole" data-i18n="overview.seeConsole">Abrir console →</button>
+                  </div>
+                  <div id="recentTicker"></div>
+                </div>
+              </div>
+              <div class="col-5">
+                <div class="card" id="ovSidePanel"></div>
+              </div>
+            </div>
+          </section>
+
+          <!-- ── Console (events) tab ─────────────────────────── -->
+          <section id="tab-events" class="hidden">
+            <div class="card">
+              <div class="console-bar">
+                <div class="live-block">
+                  <h2 data-i18n="events.title">Console ao vivo</h2>
+                  <button class="live-toggle" id="liveToggle" type="button" aria-pressed="true"><span class="ld"></span> <span id="liveToggleLbl" data-i18n="events.live">ao vivo</span></button>
+                </div>
+                <div class="console-volume">
+                  <div class="cv-spark" id="consoleSpark"></div>
+                  <span class="cv-num" id="consoleVolNum"></span>
+                  <button class="btn ghost icon-btn tiny" id="soundToggle" type="button" data-i18n-title="events.sound" data-i18n-aria="events.sound"></button>
+                  <button class="btn secondary tiny" id="refreshEvents" data-i18n="events.refresh">Atualizar</button>
+                  <button class="btn ghost tiny" id="clearEvents" data-i18n="events.clear">Limpar</button>
+                </div>
+              </div>
+              <div class="desc" data-i18n="events.desc">Atualiza automaticamente conforme os apps Meta enviam webhooks.</div>
+              <div class="feed-filters">
+                <div class="search-wrap">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+                  <input id="evtSearch" data-i18n-ph="events.searchPh" />
+                </div>
+                <select id="evtApp"><option value="" data-i18n="events.allApps">Todos os apps</option></select>
+                <select id="evtProduct">
+                  <option value="" data-i18n="events.allProducts">Todos os produtos</option>
+                  <option value="waba">WhatsApp</option>
+                  <option value="messenger">Messenger</option>
+                  <option value="instagram">Instagram</option>
+                </select>
+              </div>
+              <div id="eventsList" class="console-stream"></div>
+            </div>
+          </section>
+
+          <!-- ── Channels tab ─────────────────────────────────── -->
+          <section id="tab-channels" class="hidden">
+            <div class="sec-head">
+              <div>
+                <h2 data-i18n="channels.title">Canais conectados</h2>
+                <div class="desc" data-i18n="channels.desc">Cada canal recebe os webhooks do seu app diretamente neste hub.</div>
+              </div>
+              <div class="actions">
+                <button class="btn" id="connectBtn" data-i18n="connect.cta"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22v-5"/><path d="M9 8V2"/><path d="M15 8V2"/><path d="M18 8v5a4 4 0 0 1-4 4h-4a4 4 0 0 1-4-4V8Z"/></svg> Conectar canal</button>
+              </div>
+            </div>
+            <div id="noAppsHint" class="hint hidden" data-i18n-html="connect.noApps" style="margin-bottom:1rem"></div>
+            <div id="channelsList" class="health-grid"></div>
+          </section>
+
+          <!-- ── Apps tab ─────────────────────────────────────── -->
+          <section id="tab-apps" class="hidden">
+            <div class="sec-head">
+              <div>
+                <h2 data-i18n="apps.title">Apps Meta</h2>
+                <div class="desc" data-i18n="apps.desc">Cada app tem credenciais, URL de webhook e destinos de encaminhamento próprios.</div>
+              </div>
+              <div class="actions">
+                <button class="btn" id="newAppBtn" data-i18n="apps.new">+ Novo app</button>
+              </div>
+            </div>
+            <div id="appsList"></div>
+          </section>
+
+          <!-- ── Config tab ───────────────────────────────────── -->
+          <section id="tab-config" class="hidden">
+            <div class="card">
+              <h2 data-i18n="config.title">Geral</h2>
+              <div class="desc" data-i18n="config.desc">Preferências globais do painel.</div>
+              <div class="field" style="max-width:340px">
+                <label data-i18n="config.brandLabel">Nome de marca (painel)</label>
+                <input id="cfgBrand" placeholder="HUB RW" />
+              </div>
+              <button class="btn" id="saveSettings" data-i18n="config.save">Salvar</button>
+            </div>
+
+            <div class="card about-card">
+              <img class="hub-rw-logo-light" src="/assets/hub-rw-logo.svg" alt="HUB RW" />
+              <h2 data-i18n="config.aboutTitle">Sobre este projeto</h2>
+              <div class="desc" id="aboutDesc" style="margin-bottom:.75rem"></div>
+              <p style="font-size:.85rem;color:var(--muted);margin-bottom:1rem" data-i18n-html="config.aboutP"></p>
+            </div>
+          </section>
+
+          <!-- ── Guide tab ────────────────────────────────────── -->
+          <section id="tab-guide" class="hidden">
+            <div class="card">
+              <h2 data-i18n="guide.title">Como configurar seu app na Meta</h2>
+              <div class="desc" data-i18n="guide.intro"></div>
+              <a class="btn" href="https://developers.facebook.com/apps/" target="_blank" rel="noopener" data-i18n="guide.openMeta" style="display:inline-flex;margin-bottom:1.25rem"></a>
+              <h3 style="font-size:.95rem;margin-bottom:.6rem" data-i18n="guide.urlsTitle">URLs deste hub</h3>
+              <div class="url-box"><span class="lbl" data-i18n="guide.urlDomain"></span><code id="guideDomain">—</code><button class="btn secondary copy" id="copyDomain" data-i18n="apps.copy">Copiar</button></div>
+              <div class="url-box"><span class="lbl" data-i18n="guide.urlMsgr"></span><code id="guideMsgr">—</code><button class="btn secondary copy" id="copyMsgr" data-i18n="apps.copy">Copiar</button></div>
+              <div class="url-box"><span class="lbl" data-i18n="guide.urlWaba"></span><code id="guideWaba">—</code><button class="btn secondary copy" id="copyWaba" data-i18n="apps.copy">Copiar</button></div>
+              <div class="url-box"><span class="lbl" data-i18n="guide.urlRedirect"></span><code id="guideRedirect">—</code><button class="btn secondary copy" id="copyRedirect" data-i18n="apps.copy">Copiar</button></div>
+              <div class="url-box"><span class="lbl" data-i18n="guide.urlWebhook"></span><code id="guideWebhook">—</code></div>
+              <div class="hint" data-i18n-html="guide.urlNote" style="margin-top:.5rem"></div>
+            </div>
+            <div class="card guide-steps">
+              <div class="gstep"><h3 data-i18n="guide.s1.t"></h3><div data-i18n-html="guide.s1.b"></div></div>
+              <div class="gstep"><h3 data-i18n="guide.s2.t"></h3><div data-i18n-html="guide.s2.b"></div></div>
+              <div class="gstep"><h3 data-i18n="guide.s3.t"></h3><div data-i18n-html="guide.s3.b"></div></div>
+              <div class="gstep"><h3 data-i18n="guide.s4.t"></h3><div data-i18n-html="guide.s4.b"></div></div>
+              <div class="gstep"><h3 data-i18n="guide.s5.t"></h3><div data-i18n-html="guide.s5.b"></div></div>
+              <div class="gstep"><h3 data-i18n="guide.s6.t"></h3><div data-i18n-html="guide.s6.b"></div></div>
+              <div class="gstep"><h3 data-i18n="guide.s7.t"></h3><div data-i18n-html="guide.s7.b"></div></div>
+              <div class="gstep"><h3 data-i18n="guide.s8.t"></h3><div data-i18n-html="guide.s8.b"></div></div>
+            </div>
+            <div class="card guide-callout">
+              <h3 data-i18n="guide.callout.t"></h3>
+              <div data-i18n-html="guide.callout.b"></div>
+            </div>
+          </section>
+
+          <!-- ── Evidence (App Review) tab ────────────────────── -->
+          <section id="tab-evidence" class="hidden">
+            <div class="card">
+              <h2 data-i18n="evidence.title">Evidências (App Review)</h2>
+              <div class="desc" data-i18n="evidence.desc"></div>
+              <div class="grid2">
+                <div class="field"><label for="evApp" data-i18n="evidence.app"></label><select id="evApp"></select></div>
+                <div class="field"><label for="evProduct" data-i18n="evidence.product"></label><select id="evProduct"></select></div>
+              </div>
+              <div class="grid2">
+                <div class="field"><label for="evSource" data-i18n="evidence.source"></label><select id="evSource"></select></div>
+                <div class="field" id="evChannelWrap" style="display:none"><label for="evChannel" data-i18n="evidence.channel"></label><select id="evChannel"></select></div>
+              </div>
+              <div class="field" id="evTokenWrap" style="display:none"><label for="evToken" data-i18n="evidence.token"></label><input id="evToken" placeholder="EAA..." /></div>
+              <div class="grid2" id="evParams"></div>
+              <label class="mode-toggle" style="margin-top:.6rem"><input type="checkbox" id="evWrites" /> <b data-i18n="evidence.allowWrites"></b></label>
+              <div class="hint" data-i18n="evidence.allowWritesHint"></div>
+              <div class="field" id="evRecipientWrap" style="display:none;margin-top:.6rem"><label for="evRecipient" data-i18n="evidence.recipient"></label><input id="evRecipient" placeholder="5535988888888" /></div>
+              <div style="margin-top:1rem;display:flex;gap:.6rem;align-items:center;flex-wrap:wrap">
+                <button class="btn" id="evRun" data-i18n="evidence.run">Rodar</button>
+                <button class="btn secondary" id="evDownload" style="display:none" data-i18n="evidence.download">Baixar evidência</button>
+                <span id="evSummary" class="hint"></span>
+              </div>
+              <div id="evResults" style="margin-top:1rem"></div>
+            </div>
+          </section>
+
+          <footer class="app-footer">
+            <span id="footerOffered"></span>
+            <span class="dot">·</span>
+            <span data-i18n="footer.product">Hub para conexões Meta</span>
+            <span class="dot">·</span>
+            <a id="footerSource" href="https://github.com/hub-rw/hub-rw" target="_blank" rel="noopener" data-i18n="footer.source">Código-fonte (AGPL-3.0)</a>
+          </footer>
+        </main>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+  <script src="/i18n-data.js"></script>
+  <script src="/i18n.js"></script>
+  <script src="/app.js"></script>
+</body>
+</html>

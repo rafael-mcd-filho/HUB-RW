@@ -1,0 +1,21 @@
+{
+  "version": 2,
+  "buildCommand": "npm run build",
+  "functions": {
+    "api/index.ts": {
+      "includeFiles": [
+        "public/**",
+        "locales/**"
+      ],
+      "maxDuration": 30
+    }
+  },
+  "rewrites": [
+    { "source": "/api/(.*)", "destination": "/api/index" },
+    { "source": "/connect/(.*)", "destination": "/api/index" },
+    { "source": "/webhook/(.*)", "destination": "/api/index" },
+    { "source": "/embed/(.*)", "destination": "/api/index" },
+    { "source": "/health", "destination": "/api/index" },
+    { "source": "/i18n-data.js", "destination": "/api/index" }
+  ]
+}
