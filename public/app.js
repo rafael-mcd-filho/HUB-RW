@@ -869,7 +869,16 @@
           '<span class="pager-info">' + esc(t("events.pageOf", { cur: evtPage + 1, total: pages })) + "</span>" +
           '<button class="btn secondary" id="evtNext"' + (evtPage >= pages - 1 ? " disabled" : "") + ">" + esc(t("events.next")) + "</button>" +
         "</div>" : "";
-    el.innerHTML = pageList.map(eventHtml).join("") + pager;
+    var openIds = {};
+    el.querySelectorAll(".event details[open]").forEach(function (d) {
+      var ev = d.closest(".event"); if (ev) openIds[ev.dataset.evid] = true;
+    });
+    el.innerHTML = pageList.map(function (ev) {
+      return eventHtml(ev).replace('<div class="event ', '<div data-evid="' + escAttr(ev.id) + '" class="event ');
+    }).join("") + pager;
+    el.querySelectorAll(".event[data-evid]").forEach(function (node) {
+      if (openIds[node.dataset.evid]) { var d = node.querySelector("details"); if (d) d.open = true; }
+    });
     var pv = $("evtPrev"); if (pv) pv.addEventListener("click", function () { evtPage--; renderEventsFiltered(); window.scrollTo(0, 0); });
     var nx = $("evtNext"); if (nx) nx.addEventListener("click", function () { evtPage++; renderEventsFiltered(); window.scrollTo(0, 0); });
   }
