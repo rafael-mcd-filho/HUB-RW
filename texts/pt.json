@@ -347,5 +347,6 @@
   "result.unavailableMsg": "A conexão embedada não está habilitada para este app.",
   "result.invalidChannelTitle": "Canal inválido",
   "result.invalidChannelMsg": "Use um canal válido: waba, messenger ou instagram.",
-  "result.appNoSecretMsg": "Este app ainda não tem App ID/Secret."
+  "result.appNoSecretMsg": "Este app ainda não tem App ID/Secret.",
+  "err.ADMIN_PASSWORD_REQUIRED": "ADMIN_PASSWORD nao esta configurado. Defina a senha do painel nas variaveis de ambiente da Vercel e faca um novo deploy."
 }

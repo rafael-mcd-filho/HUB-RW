@@ -17,6 +17,8 @@ function env(name: string): string {
 export const PORT = Number(env("PORT")) || 3300;
 export const PUBLIC_URL = (env("PUBLIC_URL") || `http://localhost:${PORT}`).replace(/\/$/, "");
 export const ADMIN_PASSWORD = env("ADMIN_PASSWORD");
+export const ALLOW_OPEN_AUTH = /^(1|true|yes|on)$/i.test(env("ALLOW_OPEN_AUTH"));
+export const ADMIN_AUTH_ENABLED = !!ADMIN_PASSWORD || !ALLOW_OPEN_AUTH;
 export const WEBHOOK_DEBUG_LOG = /^(1|true|yes|on)$/i.test(env("WEBHOOK_DEBUG_LOG"));
 export const DEFAULT_API_VERSION = env("META_API_VERSION") || "v23.0";
 export const FORWARD_TIMEOUT_MS = Math.max(2000, Number(env("FORWARD_TIMEOUT_MS")) || 10000);
@@ -108,7 +110,8 @@ export function getGlobalPublicConfig() {
     brandName: getBrand(),
     publicUrl: PUBLIC_URL,
     apiVersionDefault: DEFAULT_API_VERSION,
-    adminAuthEnabled: !!ADMIN_PASSWORD,
+    adminAuthEnabled: ADMIN_AUTH_ENABLED,
+    adminAuthConfigured: !!ADMIN_PASSWORD,
   };
 }
 

@@ -340,7 +340,13 @@
     if (token) opts.headers["Authorization"] = "Bearer " + token;
     return fetch(path, opts).then(function (r) {
       if (r.status === 401) { doLogout(); throw new Error(t("login.expired")); }
-      return r.json().then(function (data) { if (!r.ok) throw new Error(translateErr(data)); return data; });
+      return r.json().then(function (data) {
+        if (!r.ok) {
+          if (data && data.error === "ADMIN_PASSWORD_REQUIRED") doLogout();
+          throw new Error(translateErr(data));
+        }
+        return data;
+      });
     });
   }
 
@@ -352,13 +358,8 @@
   function dismissWelcome() { try { localStorage.setItem("hub_welcomed", "1"); } catch (e) {} hide($("welcome")); var p = welcomeProceed; welcomeProceed = null; if (p) p(); }
   function openWelcome() { showWelcome(function () { show($("app")); }); }
 
-  var adminAuthEnabled = false;
   function proceedEntry() {
-    if (!adminAuthEnabled) {
-      api("/api/login", { method: "POST", body: { password: "" } })
-        .then(function (res) { token = res.token; localStorage.setItem(TOKEN_KEY, token); enterApp(); })
-        .catch(function () { show($("login")); });
-    } else if (token) {
+    if (token) {
       enterApp();
     } else {
       show($("login")); var p = $("loginPass"); if (p) p.focus();
@@ -367,7 +368,6 @@
   function bootstrap() {
     fetch("/api/bootstrap").then(function (r) { return r.json(); }).then(function (d) {
       document.title = d.brandName; $("loginBrand").textContent = d.brandName; $("brandName").textContent = d.brandName;
-      adminAuthEnabled = !!d.adminAuthEnabled;
       if (welcomedAlready()) proceedEntry(); else showWelcome(proceedEntry);
     }).catch(function () { show($("login")); });
   }
@@ -381,8 +381,8 @@
   function doLogout() {
     token = ""; localStorage.removeItem(TOKEN_KEY);
     if (eventsTimer) { clearInterval(eventsTimer); eventsTimer = null; }
-    hide($("app")); hide($("login")); var p = $("loginPass"); if (p) p.value = "";
-    showWelcome(proceedEntry);
+    hide($("app")); hide($("welcome")); show($("login"));
+    var p = $("loginPass"); if (p) { p.value = ""; p.focus(); }
   }
   function enterApp() { hide($("login")); show($("app")); loadConfig(); startEvents(); activateTab("overview"); }
 

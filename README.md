@@ -42,7 +42,8 @@ Acesse `http://localhost:3300`.
 | `PUBLIC_URL` | URL publica sem barra final. Em producao: `https://hub.rwsolucoesdigitais.com`. |
 | `DATABASE_URL` | PostgreSQL persistente. Obrigatorio para Vercel/serverless. Vazio usa JSON local em `data/`. |
 | `PG_POOL_MAX` | Maximo de conexoes Postgres por instancia. Padrao recomendado para Vercel: `3`. |
-| `ADMIN_PASSWORD` | Senha do painel. Obrigatoria em producao. |
+| `ADMIN_PASSWORD` | Senha do painel. Obrigatoria em producao; sem ela, o painel fica bloqueado. |
+| `ALLOW_OPEN_AUTH` | Permite painel sem senha apenas quando `true`. Use somente em desenvolvimento local. |
 | `SESSION_SECRET` | Segredo HMAC para sessao, OAuth state e assinatura. Obrigatorio em producao. |
 | `BRAND_NAME` | Nome exibido no painel. Padrao: `HUB RW`. |
 | `META_API_VERSION` | Versao padrao da Graph API. |
@@ -195,7 +196,7 @@ No App Dashboard da Meta:
 
 ## Seguranca Operacional
 
-- Nunca rode producao sem `ADMIN_PASSWORD`.
+- Nunca rode producao sem `ADMIN_PASSWORD`; sem essa variavel o painel fica bloqueado por seguranca.
 - Nunca use `PUBLIC_URL` com HTTP em producao.
 - Nunca grave senhas reais no repositorio. Use variaveis de ambiente na Vercel.
 - Rotacione a senha do PostgreSQL antes de considerar o ambiente final.

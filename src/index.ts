@@ -15,6 +15,8 @@ import {
   PORT,
   PUBLIC_URL,
   ADMIN_PASSWORD,
+  ALLOW_OPEN_AUTH,
+  ADMIN_AUTH_ENABLED,
   WEBHOOK_DEBUG_LOG,
   DEFAULT_API_VERSION,
   FORWARD_TIMEOUT_MS,
@@ -182,12 +184,15 @@ function sanitizeForwards(input: any): ForwardDest[] {
 // PUBLIC bootstrap + login
 // ─────────────────────────────────────────────────────────────────────────────
 app.get("/api/bootstrap", apiLimiter, (_req: Request, res: Response) => {
-  res.json({ brandName: getBrand(), adminAuthEnabled: !!ADMIN_PASSWORD });
+  res.json({ brandName: getBrand(), adminAuthEnabled: ADMIN_AUTH_ENABLED, adminAuthConfigured: !!ADMIN_PASSWORD });
 });
 
 app.post("/api/login", loginLimiter, (req: Request, res: Response) => {
   const { password } = req.body as { password?: string };
-  if (!ADMIN_PASSWORD) return res.json({ token: issueSession(), openMode: true });
+  if (!ADMIN_PASSWORD) {
+    if (ALLOW_OPEN_AUTH) return res.json({ token: issueSession(), openMode: true });
+    return res.status(503).json({ error: "ADMIN_PASSWORD_REQUIRED" });
+  }
   if (!passwordMatches(password || "")) return res.status(401).json({ error: "INVALID_PASSWORD" });
   return res.json({ token: issueSession(), openMode: false });
 });
@@ -892,7 +897,7 @@ export async function startServer(): Promise<void> {
     console.log(`  listening on :${PORT}`);
     console.log(`  public url:  ${PUBLIC_URL}`);
     console.log(`  storage:     ${store.usesPostgres() ? "PostgreSQL" : "JSON files"}`);
-    console.log(`  admin auth:  ${ADMIN_PASSWORD ? "ON" : "OFF (open mode - set ADMIN_PASSWORD)"}`);
+    console.log(`  admin auth:  ${ADMIN_PASSWORD ? "ON" : (ALLOW_OPEN_AUTH ? "OFF (explicit ALLOW_OPEN_AUTH)" : "LOCKED (set ADMIN_PASSWORD)")}`);
     console.log(`  apps:        ${store.listApps().length} registered`);
     console.log(`  per-app webhook: ${PUBLIC_URL}/webhook/app/<appKey>\n`);
   });

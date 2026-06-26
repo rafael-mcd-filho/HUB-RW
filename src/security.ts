@@ -4,7 +4,7 @@
 // ─────────────────────────────────────────────────────────────────────────────
 import crypto from "crypto";
 import { Request, Response, NextFunction } from "express";
-import { SESSION_SECRET, ADMIN_PASSWORD } from "./config";
+import { SESSION_SECRET, ADMIN_PASSWORD, ALLOW_OPEN_AUTH } from "./config";
 import { ChannelType, OAuthState } from "./types";
 
 function b64url(input: Buffer | string): string {
@@ -73,16 +73,20 @@ export function isValidSession(token: string): boolean {
 
 /** Constant-time password compare. */
 export function passwordMatches(input: string): boolean {
-  if (!ADMIN_PASSWORD) return true; // auth disabled
+  if (!ADMIN_PASSWORD) return ALLOW_OPEN_AUTH;
   const a = Buffer.from(String(input || ""));
   const b = Buffer.from(ADMIN_PASSWORD);
   if (a.length !== b.length) return false;
   return crypto.timingSafeEqual(a, b);
 }
 
-/** Express middleware — protects panel/admin APIs. Open when no ADMIN_PASSWORD. */
+/** Express middleware. Protects panel/admin APIs. */
 export function requireAdmin(req: Request, res: Response, next: NextFunction): void {
-  if (!ADMIN_PASSWORD) return next(); // open mode (dev)
+  if (!ADMIN_PASSWORD) {
+    if (ALLOW_OPEN_AUTH) return next();
+    res.status(503).json({ error: "ADMIN_PASSWORD_REQUIRED" });
+    return;
+  }
   const header = req.headers["authorization"] || "";
   const token = header.startsWith("Bearer ") ? header.slice(7) : "";
   if (token && isValidSession(token)) return next();
