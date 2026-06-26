@@ -792,7 +792,13 @@ async function ingest(appCfg: MetaApp | null, req: Request): Promise<void> {
       signatureValid = verifyWebhookSignature(rawBody, sig, resolved.instagramAppSecret);
     }
   }
-  const matched = parsed.externalId ? store.findChannelByExternalId(parsed.externalId) : undefined;
+  // Try to match the channel; if not found, refresh from DB once and retry
+  // (handles stale in-memory state on warm serverless instances).
+  let matched = parsed.externalId ? store.findChannelByExternalId(parsed.externalId) : undefined;
+  if (!matched && parsed.externalId) {
+    await store.refresh();
+    matched = store.findChannelByExternalId(parsed.externalId);
+  }
   if (parsed.externalId) await store.touchChannelEvent(parsed.externalId);
 
   const ev: WebhookEvent = {
@@ -820,9 +826,7 @@ async function ingest(appCfg: MetaApp | null, req: Request): Promise<void> {
     await relayToApp(resolved, parsed.product, rawBody, sig, null);
   }
 
-  if (WEBHOOK_DEBUG_LOG) {
-    console.log(`[webhook] app=${resolved?.id || "?"} product=${parsed.product} ext=${parsed.externalId} sig=${signatureValid} store=${keepHistory}`);
-  }
+  console.log(`[webhook] app=${resolved?.id || "?"} product=${parsed.product} ext=${parsed.externalId} channel=${matched?.id || "none"} sig=${signatureValid} store=${keepHistory}`);
 }
 
 // Per-app endpoints (primary).
