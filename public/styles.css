@@ -303,8 +303,7 @@ textarea:focus-visible, [tabindex]:focus-visible {
   background: linear-gradient(165deg, color-mix(in srgb, var(--signal) 14%, var(--surface)), var(--surface));
   border: 1px solid var(--border); border-radius: var(--r-lg); text-align: center; box-shadow: var(--sh-sm);
 }
-.side-promo .hub-rw-logo-dark { height: 32px; margin: 0 auto .6rem; display: block; }
-:root:not([data-theme="dark"]) .side-promo .hub-rw-logo-dark { filter: invert(1) brightness(.2); }
+.side-promo .hub-rw-logo-dark { width: 48px; height: 48px; margin: 0 auto .6rem; display: block; object-fit: contain; }
 .side-promo .promo-text { font-size: .74rem; color: var(--muted); line-height: 1.5; margin-bottom: .8rem; }
 .side-promo a.promo-btn {
   display: block; text-align: center; background: var(--signal-grad); color: #fff;
@@ -767,7 +766,7 @@ section[id^="tab-"].tab-enter { animation: tabIn .34s var(--ease); }
 :root[data-theme="dark"] .ev-row pre { background: #07090f; }
 
 /* ── Brand logos / About ──────────────────────────────────────────────────── */
-.hub-rw-logo-light { height: 34px; display: block; margin-bottom: 1rem; }
+.hub-rw-logo-light { width: 56px; height: 56px; object-fit: contain; display: block; margin-bottom: 1rem; }
 .about-card { background: linear-gradient(140deg, var(--signal-soft), var(--surface) 70%); border-color: var(--signal-border); }
 
 /* ── Footer ───────────────────────────────────────────────────────────────── */

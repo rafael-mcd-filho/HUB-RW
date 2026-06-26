@@ -337,7 +337,7 @@
     if (hasApp && hasVerify && hasChannel) {
       box.innerHTML =
         '<div class="panel-eyebrow">' + icon("sparkles") + "<span>" + esc(t("overview.promoEyebrow")) + "</span></div>" +
-        '<img class="hub-rw-logo-light" src="/assets/hub-rw-logo.svg" alt="HUB RW" style="margin:.2rem 0 .85rem" />' +
+        '<img class="hub-rw-logo-light" src="/assets/rw-logo.png" alt="HUB RW" style="margin:.2rem 0 .85rem" />' +
         '<p style="font-size:.85rem;color:var(--muted);line-height:1.55;margin-bottom:1rem">' + t("config.aboutP") + "</p>" +
         '<div class="side-cta">' +
           '<button class="btn" type="button" id="ovConnectCta">' + icon("plug") + "<span>" + esc(t("connect.cta")) + "</span></button>" +
