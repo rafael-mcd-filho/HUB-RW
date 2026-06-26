@@ -484,9 +484,9 @@
           '<button class="btn ghost icon-btn tiny app-toggle" data-toggleapp="' + escAttr(a.id) + '" aria-expanded="' + (coll ? "false" : "true") + '" title="' + escAttr(t("apps.toggle")) + '">' + icon("chevron") + "</button></div>" +
         "</div>" +
         '<div class="app-body">' +
-          '<div class="sub mono">' + esc(t("apps.appId")) + ": " + esc(a.appId) + " Â· " + esc(t("apps.api")) + " " + esc(a.apiVersion) +
-            " Â· " + esc(t("apps.verifyToken")) + " " + (a.webhookVerifyTokenSet ? esc(defined) : undef) +
-            " Â· " + esc(t("apps.secret")) + " " + (a.hasAppSecret ? esc(defined) : undef) + "</div>" +
+          '<div class="sub mono">' + esc(t("apps.appId")) + ": " + esc(a.appId) + " · " + esc(t("apps.api")) + " " + esc(a.apiVersion) +
+            " · " + esc(t("apps.verifyToken")) + " " + (a.webhookVerifyTokenSet ? esc(defined) : undef) +
+            " · " + esc(t("apps.secret")) + " " + (a.hasAppSecret ? esc(defined) : undef) + "</div>" +
           '<div class="url-box" style="margin-top:.7rem"><span class="lbl">' + esc(t("apps.webhook")) + '</span><code>' + esc(a.webhookUrls.unified) + '</code><button class="btn secondary copy tiny" data-copy-text="' + escAttr(a.webhookUrls.unified) + '">' + esc(t("apps.copy")) + "</button></div>" +
           '<div class="url-box"><span class="lbl">' + esc(t("apps.igRedirect")) + '</span><code>' + esc(a.redirectUri) + '</code><button class="btn secondary copy tiny" data-copy-text="' + escAttr(a.redirectUri) + '">' + esc(t("apps.copy")) + "</button></div>" +
           '<div class="fwd-summary">' + forwardsSummary(a.forwards) + "</div>" +
@@ -676,13 +676,13 @@
       return '<div class="health ' + esc(c.type) + '">' +
           '<div class="health-top">' + chAvatar(c) +
             '<div class="health-name"><div class="nm">' + esc(c.name) + ' <span class="badge ' + c.type + '">' + esc(chName(c.type)) + "</span></div>" +
-              '<div class="meta-line" title="' + escAttr(t("channels.idPrefix") + ": " + c.externalId + " Â· " + t("channels.appPrefix") + ": " + c.appName) + '">' + esc(c.externalId) + " Â· " + esc(c.appName) + "</div></div>" +
+              '<div class="meta-line" title="' + escAttr(t("channels.idPrefix") + ": " + c.externalId + " · " + t("channels.appPrefix") + ": " + c.appName) + '">' + esc(c.externalId) + " · " + esc(c.appName) + "</div></div>" +
             '<div class="health-actions">' +
               '<button class="btn ghost icon-btn tiny" data-refresh="' + escAttr(c.id) + '" title="' + escAttr(t("channels.refresh")) + '">' + icon("refresh") + "</button>" +
               '<button class="btn danger tiny" data-del="' + escAttr(c.id) + '">' + esc(t("channels.remove")) + "</button>" +
             "</div>" +
           "</div>" +
-          '<div class="health-mid"><div class="h-last">' + sub + " Â· " + last + '</div><div class="health-spark">' + channelSpark(c.id) + "</div></div>" +
+          '<div class="health-mid"><div class="h-last">' + sub + " · " + last + '</div><div class="health-spark">' + channelSpark(c.id) + "</div></div>" +
           chDetails(c) +
         "</div>";
     }).join("");
@@ -952,7 +952,7 @@
   function evToggleSource() {
     var src = $("evSource").value;
     evShow($("evChannelWrap"), src === "channel"); evShow($("evTokenWrap"), src === "paste");
-    if (src === "channel") $("evChannel").innerHTML = evChannelsForApp().map(function (c) { return '<option value="' + escAttr(c.id) + '">' + esc((c.type || "") + " Â· " + (c.name || c.externalId)) + "</option>"; }).join("");
+    if (src === "channel") $("evChannel").innerHTML = evChannelsForApp().map(function (c) { return '<option value="' + escAttr(c.id) + '">' + esc((c.type || "") + " · " + (c.name || c.externalId)) + "</option>"; }).join("");
     var pv = $("evProduct").value;
     evShow($("evRecipientWrap"), $("evWrites").checked && (pv === "whatsapp" || pv === "messenger"));
   }
@@ -987,7 +987,7 @@
       var cls = r.skipped ? "warn" : (r.ok ? "ok" : "bad"), st = r.skipped ? "â€”" : "HTTP " + r.status;
       var resp = typeof r.response === "string" ? r.response : JSON.stringify(r.response, null, 2);
       return '<div class="ev-row"><div class="ev-head"><span class="ev-badge ' + cls + '">' + esc(st) + "</span> <b>" + esc(r.label) + '</b> <span class="ev-group">' + esc(r.group) + "</span></div>" +
-        (r.traceId ? '<div class="ev-trace">trace ' + esc(r.traceId) + (r.requestId ? " Â· req " + esc(r.requestId) : "") + "</div>" : "") +
+        (r.traceId ? '<div class="ev-trace">trace ' + esc(r.traceId) + (r.requestId ? " · req " + esc(r.requestId) : "") + "</div>" : "") +
         "<details><summary>" + esc(t("events.payload")) + "</summary><pre>" + esc(resp) + "</pre></details></div>";
     }).join("");
   }
