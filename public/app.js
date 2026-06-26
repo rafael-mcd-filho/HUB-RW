@@ -22,6 +22,12 @@
   function escAttr(s) { return esc(s).replace(/"/g, "&quot;"); }
   function t(k, v) { return window.TEXTS ? window.TEXTS.t(k, v) : k; }
   function hasKey(k) { return window.TEXTS && window.TEXTS.has(k); }
+  function textOr(k, fallback, v) { return hasKey(k) ? t(k, v) : fallback; }
+  var FALLBACK_ERRORS = {
+    ADMIN_PASSWORD_REQUIRED: "Senha do painel nao configurada. Configure a senha do painel na Vercel e faca um novo deploy.",
+    INVALID_PASSWORD: "Senha invalida.",
+    UNAUTHORIZED: "Sessao expirada. Entre novamente."
+  };
 
   var CH_NAME = { waba: "WhatsApp", messenger: "Messenger", instagram: "Instagram" };
   function chName(p) { return CH_NAME[p] || p; }
@@ -68,13 +74,13 @@
   }
 
   function translateErr(data) {
-    if (!data) return t("err.generic");
+    if (!data) return textOr("err.generic", "Ocorreu um erro.");
     if (data.error) {
       var k = "err." + data.error;
-      var base = hasKey(k) ? t(k) : (data.message || data.error);
-      return data.detail ? (base + " â€” " + data.detail) : base;
+      var base = hasKey(k) ? t(k) : (data.message || FALLBACK_ERRORS[data.error] || textOr("err.generic", "Ocorreu um erro."));
+      return data.detail ? (base + " - " + data.detail) : base;
     }
-    return data.message || t("err.generic");
+    return data.message || textOr("err.generic", "Ocorreu um erro.");
   }
 
   // Custom confirmation popup (no native alert/confirm). Returns Promise<boolean>.
@@ -339,7 +345,7 @@
     if (opts.body && typeof opts.body !== "string") { opts.headers["Content-Type"] = "application/json"; opts.body = JSON.stringify(opts.body); }
     if (token) opts.headers["Authorization"] = "Bearer " + token;
     return fetch(path, opts).then(function (r) {
-      if (r.status === 401) { doLogout(); throw new Error(t("login.expired")); }
+      if (r.status === 401 && path !== "/api/login") { doLogout(); throw new Error(textOr("login.expired", "Sessao expirada. Entre novamente.")); }
       return r.json().then(function (data) {
         if (!r.ok) {
           if (data && data.error === "ADMIN_PASSWORD_REQUIRED") doLogout();
@@ -375,7 +381,7 @@
     $("loginErr").textContent = ""; $("loginBtn").disabled = true;
     api("/api/login", { method: "POST", body: { password: $("loginPass").value } })
       .then(function (res) { token = res.token; localStorage.setItem(TOKEN_KEY, token); hide($("login")); enterApp(); })
-      .catch(function (e) { $("loginErr").textContent = e.message || t("login.invalid"); })
+      .catch(function (e) { $("loginErr").textContent = e.message || textOr("login.invalid", "Senha invalida."); })
       .then(function () { $("loginBtn").disabled = false; });
   }
   function doLogout() {

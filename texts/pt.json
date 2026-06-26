@@ -348,5 +348,7 @@
   "result.invalidChannelTitle": "Canal inválido",
   "result.invalidChannelMsg": "Use um canal válido: waba, messenger ou instagram.",
   "result.appNoSecretMsg": "Este app ainda não tem App ID/Secret.",
-  "err.ADMIN_PASSWORD_REQUIRED": "ADMIN_PASSWORD nao esta configurado. Defina a senha do painel nas variaveis de ambiente da Vercel e faca um novo deploy."
+  "err.ADMIN_PASSWORD_REQUIRED": "Senha do painel nao configurada. Configure a senha do painel na Vercel e faca um novo deploy.",
+  "err.INVALID_PASSWORD": "Senha invalida.",
+  "err.UNAUTHORIZED": "Sessao expirada. Entre novamente."
 }

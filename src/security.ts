@@ -84,13 +84,16 @@ export function passwordMatches(input: string): boolean {
 export function requireAdmin(req: Request, res: Response, next: NextFunction): void {
   if (!ADMIN_PASSWORD) {
     if (ALLOW_OPEN_AUTH) return next();
-    res.status(503).json({ error: "ADMIN_PASSWORD_REQUIRED" });
+    res.status(503).json({
+      error: "ADMIN_PASSWORD_REQUIRED",
+      message: "Senha do painel nao configurada. Configure a senha do painel na Vercel e faca um novo deploy.",
+    });
     return;
   }
   const header = req.headers["authorization"] || "";
   const token = header.startsWith("Bearer ") ? header.slice(7) : "";
   if (token && isValidSession(token)) return next();
-  res.status(401).json({ error: "UNAUTHORIZED" });
+  res.status(401).json({ error: "UNAUTHORIZED", message: "Sessao expirada. Entre novamente." });
 }
 
 // ─── Webhook signature (X-Hub-Signature-256) ──────────────────────────────────

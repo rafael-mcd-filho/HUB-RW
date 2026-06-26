@@ -191,9 +191,12 @@ app.post("/api/login", loginLimiter, (req: Request, res: Response) => {
   const { password } = req.body as { password?: string };
   if (!ADMIN_PASSWORD) {
     if (ALLOW_OPEN_AUTH) return res.json({ token: issueSession(), openMode: true });
-    return res.status(503).json({ error: "ADMIN_PASSWORD_REQUIRED" });
+    return res.status(503).json({
+      error: "ADMIN_PASSWORD_REQUIRED",
+      message: "Senha do painel nao configurada. Configure a senha do painel na Vercel e faca um novo deploy.",
+    });
   }
-  if (!passwordMatches(password || "")) return res.status(401).json({ error: "INVALID_PASSWORD" });
+  if (!passwordMatches(password || "")) return res.status(401).json({ error: "INVALID_PASSWORD", message: "Senha invalida." });
   return res.json({ token: issueSession(), openMode: false });
 });
 
