@@ -1,4 +1,4 @@
-/* HUB RW Meta Hub panel — "Mission Control" (multi-app, i18n, live console). Vanilla JS. */
+/* HUB RW Meta Hub panel. Vanilla JS. */
 (function () {
   "use strict";
 
@@ -20,14 +20,14 @@
   function hide(el) { el && el.classList.add("hidden"); }
   function esc(s) { return String(s == null ? "" : s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;"); }
   function escAttr(s) { return esc(s).replace(/"/g, "&quot;"); }
-  function t(k, v) { return window.I18N ? window.I18N.t(k, v) : k; }
-  function hasKey(k) { return window.I18N && window.I18N.t(k) !== k; }
+  function t(k, v) { return window.TEXTS ? window.TEXTS.t(k, v) : k; }
+  function hasKey(k) { return window.TEXTS && window.TEXTS.has(k); }
 
   var CH_NAME = { waba: "WhatsApp", messenger: "Messenger", instagram: "Instagram" };
   function chName(p) { return CH_NAME[p] || p; }
   function prodLabel(p) { return p === "all" ? t("form.prodAll") : chName(p); }
 
-  // ── Lucide icons (inline SVG) ──────────────────────────────
+  // â”€â”€ Lucide icons (inline SVG) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   var ICONS = {
     plug: '<path d="M12 22v-5"/><path d="M9 8V2"/><path d="M15 8V2"/><path d="M18 8v5a4 4 0 0 1-4 4h-4a4 4 0 0 1-4-4V8Z"/>',
     grid: '<rect width="7" height="7" x="3" y="3" rx="1"/><rect width="7" height="7" x="14" y="3" rx="1"/><rect width="7" height="7" x="14" y="14" rx="1"/><rect width="7" height="7" x="3" y="14" rx="1"/>',
@@ -72,7 +72,7 @@
     if (data.error) {
       var k = "err." + data.error;
       var base = hasKey(k) ? t(k) : (data.message || data.error);
-      return data.detail ? (base + " — " + data.detail) : base;
+      return data.detail ? (base + " â€” " + data.detail) : base;
     }
     return data.message || t("err.generic");
   }
@@ -104,7 +104,7 @@
     });
   }
 
-  // ── Time + format ──────────────────────────────────────────
+  // â”€â”€ Time + format â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   function timeAgo(iso) {
     if (!iso) return "";
     var d = Date.parse(iso); if (isNaN(d)) return "";
@@ -126,7 +126,7 @@
     return '<div class="empty"><div class="empty-ico">' + icon(name) + "</div>" + esc(title) + (sub ? '<br><span class="empty-sub">' + esc(sub) + "</span>" : "") + "</div>";
   }
 
-  // ── SVG charts (no deps) ───────────────────────────────────
+  // â”€â”€ SVG charts (no deps) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   function bucketEvents(events, windowMin, buckets) {
     var now = Date.now();
     var arr = new Array(buckets); for (var k = 0; k < buckets; k++) arr[k] = 0;
@@ -169,32 +169,15 @@
       '<path class="spark-area" d="' + area + '"/><path class="spark-line" d="' + line + '"/></svg>';
   }
 
-  // ── i18n glue ──────────────────────────────────────────────
+  // â”€â”€ Text glue â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   function applyPromo() {
     var brand = t("brand.community");
     var brandHtml = "<b>" + esc(brand) + "</b>";
     var lf = $("loginFoot"); if (lf) lf.innerHTML = t("login.tool", { brand: brandHtml });
     var ad = $("aboutDesc"); if (ad) ad.innerHTML = t("config.aboutDesc", { brand: brandHtml });
-    var fo = $("footerOffered"); if (fo) fo.textContent = t("footer.offered", { brand: brand });
   }
-  function buildLangSwitcher() {
-    var btn = $("langDDBtn"), cur = $("langDDCur"), menu = $("langDDMenu");
-    if (!btn || !menu || !window.I18N) return;
-    var active = window.I18N.getLang();
-    if (cur) cur.textContent = t("lang." + active);
-    menu.innerHTML = window.I18N.langs.map(function (l) {
-      return '<li role="option" data-lang="' + l + '"' + (l === active ? ' class="active" aria-selected="true"' : ' aria-selected="false"') + ">" + esc(t("lang." + l)) + "</li>";
-    }).join("");
-    menu.onclick = function (e) {
-      var li = e.target.closest && e.target.closest("[data-lang]"); if (!li) return;
-      closeLangMenu(); window.I18N.setLang(li.getAttribute("data-lang"));
-    };
-    if (!btn._wired) { btn._wired = true; btn.addEventListener("click", function (e) { e.stopPropagation(); toggleLangMenu(); }); }
-  }
-  function toggleLangMenu() { var dd = $("langDD"); if (!dd) return; var open = dd.classList.toggle("open"); $("langDDBtn").setAttribute("aria-expanded", open ? "true" : "false"); }
-  function closeLangMenu() { var dd = $("langDD"); if (dd && dd.classList.contains("open")) { dd.classList.remove("open"); $("langDDBtn").setAttribute("aria-expanded", "false"); } }
 
-  // ── Video lightbox (guide tutorials) ───────────────────────
+  // â”€â”€ Video lightbox (guide tutorials) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   function ytIdFromHref(href) { var m = (href || "").match(/(?:youtu\.be\/|[?&]v=|embed\/)([A-Za-z0-9_-]{6,})/); return m ? m[1] : ""; }
   function vlKeydown(e) { if (e.key === "Escape") closeVideoLightbox(); }
   function closeVideoLightbox() { var ov = $("videoLightbox"); if (ov) { ov.parentNode.removeChild(ov); document.body.style.overflow = ""; document.removeEventListener("keydown", vlKeydown); } }
@@ -239,25 +222,11 @@
   function currentTab() { var a = document.querySelector("[data-tab].active"); return a ? a.getAttribute("data-tab") : "overview"; }
   function setPageTitle() { var el = $("pageTitle"); if (el) el.textContent = t("nav." + currentTab()); }
   function refreshDynamicText() {
-    applyPromo(); buildLangSwitcher(); setPageTitle(); setLiveUI(); setSoundUI();
+    applyPromo(); setPageTitle(); setLiveUI(); setSoundUI();
     populateEventAppFilter(appsCache); renderApps(appsCache); renderChannelsList();
     afterEventsChanged(); renderOverview();
   }
-  function onLangChanged() { refreshDynamicText(); }
-
-  // ── Theme ──────────────────────────────────────────────────
-  function applyTheme(th) {
-    if (th === "dark") document.documentElement.setAttribute("data-theme", "dark");
-    else document.documentElement.removeAttribute("data-theme");
-    var b = $("themeBtn"); if (b) b.innerHTML = icon(th === "dark" ? "sun" : "moon");
-  }
-  function toggleTheme() {
-    var th = document.documentElement.getAttribute("data-theme") === "dark" ? "light" : "dark";
-    try { localStorage.setItem("hub_theme", th); } catch (e) {}
-    applyTheme(th); renderOverview();
-  }
-
-  // ── Stats / KPI ────────────────────────────────────────────
+// â”€â”€ Stats / KPI â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   function setStat(id, v) {
     var el = $(id); if (!el) return;
     var target = Number(v) || 0;
@@ -280,7 +249,7 @@
   }
   function setNavCount(id, n) { var el = $(id); if (!el) return; if (n > 0) { el.textContent = n; el.hidden = false; } else { el.hidden = true; } }
 
-  // ── Overview ───────────────────────────────────────────────
+  // â”€â”€ Overview â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   function renderOverview() {
     if (!$("tab-overview")) return;
     renderKpiSpark(); renderActivityChart(); renderChannelMix(); renderRecentTicker(); renderSidePanel();
@@ -364,7 +333,7 @@
     if (cta) cta.addEventListener("click", function () { if (next === "newapp") { gotoTab("apps"); openAppForm(null); } else openConnectDrawer(); });
   }
 
-  // ── API ────────────────────────────────────────────────────
+  // â”€â”€ API â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   function api(path, opts) {
     opts = opts || {}; opts.headers = opts.headers || {};
     if (opts.body && typeof opts.body !== "string") { opts.headers["Content-Type"] = "application/json"; opts.body = JSON.stringify(opts.body); }
@@ -375,8 +344,8 @@
     });
   }
 
-  // ── Auth ───────────────────────────────────────────────────
-  // ── Welcome (initial screen) ───────────────────────────────
+  // â”€â”€ Auth â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // â”€â”€ Welcome (initial screen) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   var welcomeProceed = null;
   function welcomedAlready() { try { return localStorage.getItem("hub_welcomed") === "1"; } catch (e) { return false; } }
   function showWelcome(proceed) { welcomeProceed = proceed; hide($("login")); hide($("app")); show($("welcome")); }
@@ -417,12 +386,11 @@
   }
   function enterApp() { hide($("login")); show($("app")); loadConfig(); startEvents(); activateTab("overview"); }
 
-  // ── Global config ──────────────────────────────────────────
+  // â”€â”€ Global config â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   function loadConfig() {
     api("/api/config").then(function (c) {
       $("brandName").textContent = c.brandName; document.title = c.brandName; $("cfgBrand").value = c.brandName || "";
       publicUrl = c.publicUrl || "";
-      var fs = $("footerSource"); if (fs && c.sourceUrl) fs.href = c.sourceUrl;
       fillGuideUrls();
     }).catch(function (e) { toast(e.message, true); });
   }
@@ -443,7 +411,7 @@
       .then(function () { $("saveSettings").disabled = false; });
   }
 
-  // ── Apps ───────────────────────────────────────────────────
+  // â”€â”€ Apps â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   var FWD_PRODS = ["all", "waba", "messenger", "instagram"];
   var appCollapsed = {}; // per-app collapse state (appId -> bool); default collapsed when many apps
   function loadApps() {
@@ -465,7 +433,7 @@
 
   var CH_COLOR = { waba: "#1faa53", messenger: "#0084FF", instagram: "#E1306C" };
   var CH_IMG = { waba: "/assets/waba.png", messenger: "/assets/messenger.png", instagram: "/assets/instagram.png" };
-  function embedUrl(appId, channel) { return publicUrl + "/embed/connect?app=" + encodeURIComponent(appId) + "&channel=" + channel + "&lang=" + (window.I18N ? window.I18N.getLang() : "pt"); }
+  function embedUrl(appId, channel) { return publicUrl + "/embed/connect?app=" + encodeURIComponent(appId) + "&channel=" + channel; }
   function embedSnippet(appId, channel) {
     var url = embedUrl(appId, channel);
     return '<a href="' + url + '" target="_blank" rel="noopener" ' +
@@ -510,9 +478,9 @@
           '<button class="btn ghost icon-btn tiny app-toggle" data-toggleapp="' + escAttr(a.id) + '" aria-expanded="' + (coll ? "false" : "true") + '" title="' + escAttr(t("apps.toggle")) + '">' + icon("chevron") + "</button></div>" +
         "</div>" +
         '<div class="app-body">' +
-          '<div class="sub mono">' + esc(t("apps.appId")) + ": " + esc(a.appId) + " · " + esc(t("apps.api")) + " " + esc(a.apiVersion) +
-            " · " + esc(t("apps.verifyToken")) + " " + (a.webhookVerifyTokenSet ? esc(defined) : undef) +
-            " · " + esc(t("apps.secret")) + " " + (a.hasAppSecret ? esc(defined) : undef) + "</div>" +
+          '<div class="sub mono">' + esc(t("apps.appId")) + ": " + esc(a.appId) + " Â· " + esc(t("apps.api")) + " " + esc(a.apiVersion) +
+            " Â· " + esc(t("apps.verifyToken")) + " " + (a.webhookVerifyTokenSet ? esc(defined) : undef) +
+            " Â· " + esc(t("apps.secret")) + " " + (a.hasAppSecret ? esc(defined) : undef) + "</div>" +
           '<div class="url-box" style="margin-top:.7rem"><span class="lbl">' + esc(t("apps.webhook")) + '</span><code>' + esc(a.webhookUrls.unified) + '</code><button class="btn secondary copy tiny" data-copy-text="' + escAttr(a.webhookUrls.unified) + '">' + esc(t("apps.copy")) + "</button></div>" +
           '<div class="url-box"><span class="lbl">' + esc(t("apps.igRedirect")) + '</span><code>' + esc(a.redirectUri) + '</code><button class="btn secondary copy tiny" data-copy-text="' + escAttr(a.redirectUri) + '">' + esc(t("apps.copy")) + "</button></div>" +
           '<div class="fwd-summary">' + forwardsSummary(a.forwards) + "</div>" +
@@ -544,7 +512,7 @@
     });
   }
 
-  // ── App form (drawer) ──────────────────────────────────────
+  // â”€â”€ App form (drawer) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   function fwdRowHtml(f) {
     f = f || { url: "", products: ["all"], enabled: true };
     var prod = (f.products && f.products.indexOf("all") < 0 && f.products[0]) ? f.products[0] : "all";
@@ -553,7 +521,7 @@
       '<input class="fwd-url" placeholder="' + escAttr(t("form.fwdUrlPh")) + '" value="' + escAttr(f.url) + '" />' +
       '<select class="fwd-prod">' + opts + "</select>" +
       '<label class="fwd-en"><input type="checkbox"' + (f.enabled !== false ? " checked" : "") + " /> " + esc(t("form.fwdActive")) + "</label>" +
-      '<button type="button" class="btn ghost fwd-del" title="' + escAttr(t("apps.remove")) + '">×</button>' +
+      '<button type="button" class="btn ghost fwd-del" title="' + escAttr(t("apps.remove")) + '">Ã—</button>' +
     "</div>";
   }
 
@@ -659,7 +627,7 @@
       .then(function () { var s = $("afSave"); if (s) s.disabled = false; });
   }
 
-  // ── Channels (health cards) ────────────────────────────────
+  // â”€â”€ Channels (health cards) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   var chList = [], chAutoTried = {};
   function loadChannels() {
     var el = $("channelsList");
@@ -702,13 +670,13 @@
       return '<div class="health ' + esc(c.type) + '">' +
           '<div class="health-top">' + chAvatar(c) +
             '<div class="health-name"><div class="nm">' + esc(c.name) + ' <span class="badge ' + c.type + '">' + esc(chName(c.type)) + "</span></div>" +
-              '<div class="meta-line" title="' + escAttr(t("channels.idPrefix") + ": " + c.externalId + " · " + t("channels.appPrefix") + ": " + c.appName) + '">' + esc(c.externalId) + " · " + esc(c.appName) + "</div></div>" +
+              '<div class="meta-line" title="' + escAttr(t("channels.idPrefix") + ": " + c.externalId + " Â· " + t("channels.appPrefix") + ": " + c.appName) + '">' + esc(c.externalId) + " Â· " + esc(c.appName) + "</div></div>" +
             '<div class="health-actions">' +
               '<button class="btn ghost icon-btn tiny" data-refresh="' + escAttr(c.id) + '" title="' + escAttr(t("channels.refresh")) + '">' + icon("refresh") + "</button>" +
               '<button class="btn danger tiny" data-del="' + escAttr(c.id) + '">' + esc(t("channels.remove")) + "</button>" +
             "</div>" +
           "</div>" +
-          '<div class="health-mid"><div class="h-last">' + sub + " · " + last + '</div><div class="health-spark">' + channelSpark(c.id) + "</div></div>" +
+          '<div class="health-mid"><div class="h-last">' + sub + " Â· " + last + '</div><div class="health-spark">' + channelSpark(c.id) + "</div></div>" +
           chDetails(c) +
         "</div>";
     }).join("");
@@ -741,7 +709,7 @@
     });
   }
 
-  // ── Connect drawer ─────────────────────────────────────────
+  // â”€â”€ Connect drawer â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   function connectPick(ch) {
     return '<button class="connect-pick" data-cd="' + ch + '"><img class="ch-logo" src="/assets/' + ch + '.png" alt="" />' +
       '<span class="cp-txt"><span>' + esc(t("connect." + ch)) + "</span><small>" + esc(t("connect." + ch + "Sub")) + "</small></span></button>";
@@ -777,7 +745,7 @@
   }
   function connect(channel, appId) {
     if (!appId) { toast(t("connect.needApp"), true); return; }
-    api("/api/connect/" + channel + "/init", { method: "POST", body: { appId: appId, lang: window.I18N ? window.I18N.getLang() : "pt" } })
+    api("/api/connect/" + channel + "/init", { method: "POST", body: { appId: appId } })
       .then(function (d) { var w = window.open(d.url, "hub_connect", "width=560,height=740"); if (!w) toast(t("connect.popupBlocked"), true); else closeDrawer(); })
       .catch(function (e) { toast(e.message, true); });
   }
@@ -789,7 +757,7 @@
     }
   });
 
-  // ── Events (live console) ──────────────────────────────────
+  // â”€â”€ Events (live console) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   var eventsBuffer = [], newIds = {};
   var audioCtx = null;
   function blip() {
@@ -839,7 +807,7 @@
     if (!fwds || !fwds.length) return "";
     return fwds.map(function (f) { var ok = f.status === "pending" ? "warn" : (f.ok ? "ok" : "warn"); return ' <span class="badge ' + ok + '" title="' + escAttr(f.url) + '">' + esc(String(f.status)) + "</span>"; }).join("");
   }
-  function cleanSummary(s) { return String(s == null ? "" : s).replace(/\[object Object\]/g, "—"); }
+  function cleanSummary(s) { return String(s == null ? "" : s).replace(/\[object Object\]/g, "â€”"); }
   function highlightJson(obj) {
     var json; try { json = JSON.stringify(obj, null, 2); } catch (e) { json = String(obj); }
     if (json == null) return "";
@@ -876,8 +844,6 @@
   function eventMatches(e) {
     var p = $("evtProduct") ? $("evtProduct").value : ""; if (p && e.product !== p) return false;
     var a = $("evtApp") ? $("evtApp").value : ""; if (a && e.appId !== a) return false;
-    var q = $("evtSearch") ? $("evtSearch").value.trim().toLowerCase() : "";
-    if (q && (e.summary || "").toLowerCase().indexOf(q) < 0 && (e.appName || "").toLowerCase().indexOf(q) < 0) return false;
     return true;
   }
   var EVT_PAGE_SIZE = 20, evtPage = 0;
@@ -917,7 +883,7 @@
   function setSound(on) { soundOn = on; try { localStorage.setItem("hub_sound", on ? "1" : "0"); } catch (e) {} setSoundUI(); if (on) blip(); }
   function setSoundUI() { var b = $("soundToggle"); if (b) { b.innerHTML = icon(soundOn ? "sound" : "soundOff"); b.classList.toggle("active", soundOn); } }
 
-  // ── Tabs ───────────────────────────────────────────────────
+  // â”€â”€ Tabs â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   function activateTab(tab) {
     Array.prototype.forEach.call(document.querySelectorAll("[data-tab]"), function (b) {
       var on = b.getAttribute("data-tab") === tab;
@@ -946,83 +912,7 @@
     });
   }
 
-  // ── Command palette (Ctrl/Cmd-K) ───────────────────────────
-  var CMDK = { open: false, items: [], active: 0 };
-  function buildCommands() {
-    var cmds = [];
-    var navMap = { overview: "dash", events: "activity", channels: "plug", apps: "grid", config: "sliders", guide: "book", evidence: "check" };
-    TABS.forEach(function (tab) { cmds.push({ group: t("cmdk.navigate"), title: t("nav." + tab), icon: navMap[tab], kw: tab, run: function () { gotoTab(tab); } }); });
-    cmds.push({ group: t("cmdk.actions"), title: t("connect.cta"), icon: "plug", kw: "conectar connect canal channel", run: function () { gotoTab("channels"); openConnectDrawer(); } });
-    cmds.push({ group: t("cmdk.actions"), title: t("apps.new"), icon: "plus", kw: "novo app new", run: function () { gotoTab("apps"); openAppForm(null); } });
-    cmds.push({ group: t("cmdk.actions"), title: t("cmdk.toggleTheme"), icon: "moon", kw: "tema theme dark light escuro claro", run: function () { toggleTheme(); } });
-    cmds.push({ group: t("cmdk.actions"), title: t("cmdk.toggleLive"), icon: "activity", kw: "live ao vivo pausar pause", run: function () { setLive(!liveOn); } });
-    cmds.push({ group: t("cmdk.actions"), title: t("events.clear"), icon: "trash", kw: "limpar clear interacoes", run: function () { gotoTab("events"); clearEvents(); } });
-    if (window.I18N) window.I18N.langs.forEach(function (l) { cmds.push({ group: t("cmdk.language"), title: t("lang." + l), icon: "globe", kw: "idioma language " + l, run: function () { window.I18N.setLang(l); } }); });
-    return cmds;
-  }
-  function openCmdk() {
-    if (CMDK.open) return;
-    CMDK.open = true; CMDK.items = buildCommands(); CMDK.active = 0;
-    var ov = document.createElement("div"); ov.className = "cmdk-overlay"; ov.id = "cmdkOverlay";
-    ov.innerHTML =
-      '<div class="cmdk" role="dialog" aria-modal="true" aria-label="' + escAttr(t("cmdk.title")) + '">' +
-        '<div class="cmdk-input-wrap">' + icon("search") + '<input id="cmdkInput" type="text" placeholder="' + escAttr(t("cmdk.placeholder")) + '" autocomplete="off" />' + '<span class="kbd">Esc</span></div>' +
-        '<div class="cmdk-list" id="cmdkList"></div>' +
-      "</div>";
-    document.body.appendChild(ov);
-    CMDK.el = ov;
-    ov.addEventListener("mousedown", function (e) { if (e.target === ov) closeCmdk(); });
-    var input = $("cmdkInput");
-    input.addEventListener("input", function () { CMDK.active = 0; renderCmdkList(input.value); });
-    input.addEventListener("keydown", cmdkKeydown);
-    requestAnimationFrame(function () { ov.classList.add("open"); input.focus(); });
-    renderCmdkList("");
-  }
-  function closeCmdk() {
-    if (!CMDK.open || !CMDK.el) return;
-    var el = CMDK.el; CMDK.open = false; CMDK.el = null;
-    el.classList.remove("open");
-    setTimeout(function () { if (el.parentNode) el.parentNode.removeChild(el); }, 160);
-  }
-  function cmdkFiltered(q) {
-    q = (q || "").trim().toLowerCase();
-    if (!q) return CMDK.items;
-    return CMDK.items.filter(function (c) { return (c.title + " " + (c.kw || "") + " " + c.group).toLowerCase().indexOf(q) >= 0; });
-  }
-  function renderCmdkList(q) {
-    var box = $("cmdkList"); if (!box) return;
-    var list = cmdkFiltered(q); CMDK._list = list;
-    if (!list.length) { box.innerHTML = '<div class="cmdk-empty">' + esc(t("cmdk.empty")) + "</div>"; return; }
-    if (CMDK.active >= list.length) CMDK.active = list.length - 1;
-    var html = "", lastGroup = null;
-    list.forEach(function (c, i) {
-      if (c.group !== lastGroup) { html += '<div class="cmdk-group-label">' + esc(c.group) + "</div>"; lastGroup = c.group; }
-      html += '<div class="cmdk-item' + (i === CMDK.active ? " active" : "") + '" data-i="' + i + '"><span class="ci-ico">' + icon(c.icon) + '</span><div class="ci-body"><div class="ci-title">' + esc(c.title) + "</div></div></div>";
-    });
-    box.innerHTML = html;
-    Array.prototype.forEach.call(box.querySelectorAll(".cmdk-item"), function (it) {
-      it.addEventListener("mousemove", function () { CMDK.active = Number(it.getAttribute("data-i")); paintActive(); });
-      it.addEventListener("click", function () { runCmdk(Number(it.getAttribute("data-i"))); });
-    });
-  }
-  function paintActive() {
-    var box = $("cmdkList"); if (!box) return;
-    Array.prototype.forEach.call(box.querySelectorAll(".cmdk-item"), function (it) {
-      var on = Number(it.getAttribute("data-i")) === CMDK.active;
-      it.classList.toggle("active", on);
-      if (on && it.scrollIntoView) it.scrollIntoView({ block: "nearest" });
-    });
-  }
-  function runCmdk(i) { var c = (CMDK._list || [])[i]; closeCmdk(); if (c && c.run) c.run(); }
-  function cmdkKeydown(e) {
-    var list = CMDK._list || [];
-    if (e.key === "Escape") { e.preventDefault(); closeCmdk(); }
-    else if (e.key === "ArrowDown") { e.preventDefault(); CMDK.active = Math.min(list.length - 1, CMDK.active + 1); paintActive(); }
-    else if (e.key === "ArrowUp") { e.preventDefault(); CMDK.active = Math.max(0, CMDK.active - 1); paintActive(); }
-    else if (e.key === "Enter") { e.preventDefault(); runCmdk(CMDK.active); }
-  }
-
-  // ── Evidence (App Review) ──────────────────────────────────
+  // â”€â”€ Evidence (App Review) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   var EV = { loaded: false, suites: [], apps: [], channels: [], lastDoc: "", lastFile: "" };
   function evShow(el, on) { if (el) el.style.display = on ? "" : "none"; }
   function evSuiteByKey(k) { for (var i = 0; i < EV.suites.length; i++) if (EV.suites[i].key === k) return EV.suites[i]; return null; }
@@ -1056,7 +946,7 @@
   function evToggleSource() {
     var src = $("evSource").value;
     evShow($("evChannelWrap"), src === "channel"); evShow($("evTokenWrap"), src === "paste");
-    if (src === "channel") $("evChannel").innerHTML = evChannelsForApp().map(function (c) { return '<option value="' + escAttr(c.id) + '">' + esc((c.type || "") + " · " + (c.name || c.externalId)) + "</option>"; }).join("");
+    if (src === "channel") $("evChannel").innerHTML = evChannelsForApp().map(function (c) { return '<option value="' + escAttr(c.id) + '">' + esc((c.type || "") + " Â· " + (c.name || c.externalId)) + "</option>"; }).join("");
     var pv = $("evProduct").value;
     evShow($("evRecipientWrap"), $("evWrites").checked && (pv === "whatsapp" || pv === "messenger"));
   }
@@ -1088,10 +978,10 @@
   }
   function evRenderResults(records) {
     $("evResults").innerHTML = records.map(function (r) {
-      var cls = r.skipped ? "warn" : (r.ok ? "ok" : "bad"), st = r.skipped ? "—" : "HTTP " + r.status;
+      var cls = r.skipped ? "warn" : (r.ok ? "ok" : "bad"), st = r.skipped ? "â€”" : "HTTP " + r.status;
       var resp = typeof r.response === "string" ? r.response : JSON.stringify(r.response, null, 2);
       return '<div class="ev-row"><div class="ev-head"><span class="ev-badge ' + cls + '">' + esc(st) + "</span> <b>" + esc(r.label) + '</b> <span class="ev-group">' + esc(r.group) + "</span></div>" +
-        (r.traceId ? '<div class="ev-trace">trace ' + esc(r.traceId) + (r.requestId ? " · req " + esc(r.requestId) : "") + "</div>" : "") +
+        (r.traceId ? '<div class="ev-trace">trace ' + esc(r.traceId) + (r.requestId ? " Â· req " + esc(r.requestId) : "") + "</div>" : "") +
         "<details><summary>" + esc(t("events.payload")) + "</summary><pre>" + esc(resp) + "</pre></details></div>";
     }).join("");
   }
@@ -1103,29 +993,19 @@
     setTimeout(function () { URL.revokeObjectURL(a.href); a.remove(); }, 100);
   }
 
-  // ── Wire up ────────────────────────────────────────────────
+  // â”€â”€ Wire up â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   var resizeTimer = null;
   document.addEventListener("DOMContentLoaded", function () {
-    if (window.I18N) window.I18N.applyI18n(document);
-    buildLangSwitcher(); initVideoLightbox(); initVideoThumbs();
-    document.addEventListener("click", function (e) {
-      var dd = $("langDD");
-      if (dd && dd.classList.contains("open") && (!e.target.closest || !e.target.closest("#langDD"))) closeLangMenu();
-    });
+    if (window.TEXTS) window.TEXTS.applyTexts(document);
+    initVideoLightbox(); initVideoThumbs();
     applyPromo(); setPageTitle();
-    var isMac = /Mac|iPhone|iPad/.test(navigator.platform || "");
-    var hint = $("cmdkHint"); if (hint) hint.textContent = isMac ? "⌘ K" : "Ctrl K";
-    window.addEventListener("i18n:changed", onLangChanged);
     setupTabs();
-    applyTheme(document.documentElement.getAttribute("data-theme") === "dark" ? "dark" : "light");
     setSoundUI(); setLiveUI();
     $("loginForm").addEventListener("submit", function (e) { e.preventDefault(); doLogin(); });
     $("logoutBtn").addEventListener("click", doLogout);
-    $("themeBtn").addEventListener("click", toggleTheme);
     $("saveSettings").addEventListener("click", saveSettings);
     $("newAppBtn").addEventListener("click", function () { openAppForm(null); });
     $("connectBtn").addEventListener("click", openConnectDrawer);
-    $("cmdkBtn").addEventListener("click", openCmdk);
     var welcomeEnterBtn = $("welcomeEnter"); if (welcomeEnterBtn) welcomeEnterBtn.addEventListener("click", dismissWelcome);
     var brandHomeBtn = $("brandHome"); if (brandHomeBtn) brandHomeBtn.addEventListener("click", openWelcome);
     $("ovSeeConsole").addEventListener("click", function () { gotoTab("events"); });
@@ -1133,10 +1013,7 @@
     $("soundToggle").addEventListener("click", function () { setSound(!soundOn); });
     $("refreshEvents").addEventListener("click", function () { fetchEvents(true); });
     $("clearEvents").addEventListener("click", clearEvents);
-    ["evtSearch", "evtApp", "evtProduct"].forEach(function (id) { var el = $(id); if (el) { el.addEventListener("input", onEvtFilter); el.addEventListener("change", onEvtFilter); } });
-    document.addEventListener("keydown", function (e) {
-      if ((e.ctrlKey || e.metaKey) && (e.key === "k" || e.key === "K")) { e.preventDefault(); if (CMDK.open) closeCmdk(); else openCmdk(); }
-    });
+    ["evtApp", "evtProduct"].forEach(function (id) { var el = $(id); if (el) { el.addEventListener("input", onEvtFilter); el.addEventListener("change", onEvtFilter); } });
     document.addEventListener("click", function (e) {
       if (!e.target.closest) return;
       var tb = e.target.closest("[data-embed-test]");

@@ -1,11 +1,3 @@
-// HUB RW Meta Hub - persistence layer.
-// Copyright (C) 2026 HUB RW
-//
-// JSON files are kept for local/dev deployments. When DATABASE_URL is present,
-// data is stored in PostgreSQL so serverless deployments can persist state.
-//
-// Source: https://github.com/hub-rw/hub-rw
-
 import fs from "fs";
 import path from "path";
 import { Pool } from "pg";

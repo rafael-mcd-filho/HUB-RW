@@ -27,11 +27,11 @@ ENV NODE_ENV=production
 COPY package.json package-lock.json ./
 RUN npm ci --omit=dev && npm cache clean --force
 
-# Código compilado + assets lidos em runtime (public/ e locales/ são lidos por
+# Código compilado + assets lidos em runtime (public/ e texts/ são lidos por
 # fs a partir de /app, ou seja __dirname(/app/dist)/.. — precisam existir).
 COPY --from=builder /app/dist ./dist
 COPY public ./public
-COPY locales ./locales
+COPY texts ./texts
 
 # Diretório de dados persistentes (apps/canais/eventos/settings em JSON).
 # Criado com dono "node" para o processo não-root poder gravar no volume montado.

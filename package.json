@@ -2,15 +2,16 @@
   "name": "hub-rw-meta",
   "version": "1.0.0",
   "description": "HUB RW standalone hub to connect Meta channels (WhatsApp Business, Messenger, Instagram) and receive webhook interactions.",
-  "license": "AGPL-3.0-only",
+  "private": true,
+  "license": "UNLICENSED",
   "author": "HUB RW",
-  "homepage": "https://github.com/hub-rw/hub-rw",
+  "homepage": "https://hub.rwsolucoesdigitais.com",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/hub-rw/hub-rw.git"
+    "url": "git+https://github.com/rafael-mcd-filho/HUB-RW.git"
   },
   "bugs": {
-    "url": "https://github.com/hub-rw/hub-rw/issues"
+    "url": "https://github.com/rafael-mcd-filho/HUB-RW/issues"
   },
   "main": "dist/index.js",
   "scripts": {

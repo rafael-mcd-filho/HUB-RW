@@ -12,7 +12,7 @@ O projeto nao depende de backend externo obrigatorio. Em desenvolvimento e Docke
 - Encaminhamento: POST do payload recebido para URLs configuradas por app.
 - Modo historico ou transacional: salvar eventos no painel ou apenas encaminhar.
 - Botoes embed: snippets publicos para iniciar conexao fora do painel.
-- Painel protegido por senha, i18n, tema claro/escuro e console ao vivo.
+- Painel protegido por senha, textos em portugues e console ao vivo.
 - Healthcheck em `GET /health`.
 
 ## Desenvolvimento Local
@@ -44,7 +44,6 @@ Acesse `http://localhost:3300`.
 | `PG_POOL_MAX` | Maximo de conexoes Postgres por instancia. Padrao recomendado para Vercel: `3`. |
 | `ADMIN_PASSWORD` | Senha do painel. Obrigatoria em producao. |
 | `SESSION_SECRET` | Segredo HMAC para sessao, OAuth state e assinatura. Obrigatorio em producao. |
-| `SOURCE_URL` | Repositorio da versao publicada, exigido para compliance AGPL. |
 | `BRAND_NAME` | Nome exibido no painel. Padrao: `HUB RW`. |
 | `META_API_VERSION` | Versao padrao da Graph API. |
 | `FORWARD_TIMEOUT_MS` | Timeout dos encaminhamentos. |
@@ -63,11 +62,10 @@ O projeto ja inclui `api/index.ts` e `vercel.json`. Na Vercel, o Express roda co
 
 ```env
 PUBLIC_URL=https://hub.rwsolucoesdigitais.com
-DATABASE_URL=postgresql://hubrwsolucoes:SUA_SENHA@SEU_HOST:5432/hubrwsolucoes?sslmode=disable
+DATABASE_URL=postgresql://USUARIO:SENHA@HOST:5432/NOME_DO_BANCO?sslmode=disable
 PG_POOL_MAX=3
 ADMIN_PASSWORD=troque-por-uma-senha-forte
 SESSION_SECRET=gere-com-openssl-rand-hex-32
-SOURCE_URL=https://github.com/sua-org/hub-rw
 BRAND_NAME=HUB RW
 ```
 
@@ -127,7 +125,6 @@ cp .env.example .env
 PUBLIC_URL=https://hub.rwsolucoesdigitais.com
 ADMIN_PASSWORD=troque-por-uma-senha-forte
 SESSION_SECRET=gere-com-openssl-rand-hex-32
-SOURCE_URL=https://github.com/sua-org/hub-rw
 BRAND_NAME=HUB RW
 HOST_PORT=3300
 ```
@@ -244,7 +241,3 @@ Webhooks:
 Saude:
 
 - `GET /health`
-
-## Licenca
-
-Licenciado sob a GNU Affero General Public License v3.0. Por ser um servico de rede, a AGPL exige que usuarios remotos consigam acessar o codigo-fonte correspondente da versao em execucao. Em producao, mantenha `SOURCE_URL` apontando para o repositorio correto da versao publicada.

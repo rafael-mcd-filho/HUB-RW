@@ -1,20 +1,3 @@
-// HUB RW Meta Hub — standalone hub for Meta channels.
-// Copyright (C) 2026 HUB RW
-//
-// This program is free software: you can redistribute it and/or modify
-// it under the terms of version 3 of the GNU Affero General Public License as
-// published by the Free Software Foundation.
-//
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU Affero General Public License for more details.
-//
-// You should have received a copy of the GNU Affero General Public License
-// along with this program.  If not, see <https://www.gnu.org/licenses/>.
-//
-// Source: https://github.com/hub-rw/hub-rw
-
 // ─────────────────────────────────────────────────────────────────────────────
 // Global configuration + per-app helpers (multi-app).
 // App credentials live in the apps store; this module resolves global bits
@@ -38,9 +21,6 @@ export const WEBHOOK_DEBUG_LOG = /^(1|true|yes|on)$/i.test(env("WEBHOOK_DEBUG_LO
 export const DEFAULT_API_VERSION = env("META_API_VERSION") || "v23.0";
 export const FORWARD_TIMEOUT_MS = Math.max(2000, Number(env("FORWARD_TIMEOUT_MS")) || 10000);
 
-// AGPL-3.0 §13: remote users must be able to obtain the Corresponding Source.
-// Shown as a "Source" link in the panel footer. Override via env if you fork.
-export const SOURCE_URL = (env("SOURCE_URL") || "https://github.com/hub-rw/hub-rw").replace(/\/$/, "");
 
 export const SESSION_SECRET = (() => {
   const fromEnv = env("SESSION_SECRET");
@@ -129,7 +109,6 @@ export function getGlobalPublicConfig() {
     publicUrl: PUBLIC_URL,
     apiVersionDefault: DEFAULT_API_VERSION,
     adminAuthEnabled: !!ADMIN_PASSWORD,
-    sourceUrl: SOURCE_URL,
   };
 }
 

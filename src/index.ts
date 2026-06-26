@@ -1,26 +1,8 @@
-// HUB RW Meta Hub — standalone hub for Meta channels.
-// Copyright (C) 2026 HUB RW
-//
-// This program is free software: you can redistribute it and/or modify
-// it under the terms of version 3 of the GNU Affero General Public License as
-// published by the Free Software Foundation.
-//
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU Affero General Public License for more details.
-//
-// You should have received a copy of the GNU Affero General Public License
-// along with this program.  If not, see <https://www.gnu.org/licenses/>.
-//
-// Source: https://github.com/hub-rw/hub-rw
-
 // ─────────────────────────────────────────────────────────────────────────────
 // HUB RW Meta Hub — standalone multi-app hub.
 // Connects Meta channels (WhatsApp Business, Messenger, Instagram) via each
 // registered app's own OAuth, receives + displays their webhook interactions,
 // and routes (forwards) those webhooks per-app to other endpoints.
-// No external license check and no dependency on any other backend.
 // ─────────────────────────────────────────────────────────────────────────────
 import "dotenv/config";
 import express, { Request, Response } from "express";
@@ -56,7 +38,7 @@ import {
 import * as store from "./store";
 import * as meta from "./meta";
 import * as evidence from "./evidence";
-import { tServer, localesScript, normalizeLang, reloadLocales } from "./i18n";
+import { tServer, textsScript, reloadTexts } from "./texts";
 import { parseWebhook } from "./webhook-parse";
 import { Channel, ChannelPublic, ChannelType, ForwardDest, ForwardProduct, MetaApp, WebhookEvent } from "./types";
 
@@ -132,25 +114,23 @@ function htmlEscape(s: string): string {
   return String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 }
 
-function renderResultPage(res: Response, ok: boolean, lang: string, titleKey: string, msgKey: string, vars?: Record<string, string | number>): void {
-  const L = normalizeLang(lang);
-  const title = tServer(L, titleKey);
-  const message = tServer(L, msgKey, vars);
-  const back = tServer(L, "result.back");
-  const footer = tServer(L, "result.footer");
+function renderResultPage(res: Response, ok: boolean, titleKey: string, msgKey: string, vars?: Record<string, string | number>): void {
+  const title = tServer(titleKey);
+  const message = tServer(msgKey, vars);
+  const back = tServer("result.back");
+  const footer = tServer("result.footer");
   const color = ok ? "#16a34a" : "#dc2626";
   const icon = ok
     ? '<svg viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>'
     : '<svg viewBox="0 0 24 24" fill="none" stroke="#d97706" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" x2="12" y1="9" y2="13"/><line x1="12" x2="12.01" y1="17" y2="17"/></svg>';
   res.setHeader("Content-Type", "text/html; charset=utf-8");
-  res.send(`<!DOCTYPE html><html lang="${L}"><head><meta charset="UTF-8"/>
+  res.send(`<!DOCTYPE html><html lang="pt"><head><meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>${htmlEscape(title)} · HUB RW</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
 <style>
   *{box-sizing:border-box;margin:0;padding:0}
   :root{--bg:#f3f4f7;--card:#fff;--text:#0a0d15;--muted:#5b6473;--border:#e7e9f1}
-  @media (prefers-color-scheme:dark){:root{--bg:#07090f;--card:#11141d;--text:#e9eef7;--muted:#96a0b1;--border:#1f232f}}
   body{font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;padding:1rem;color:var(--text);background:radial-gradient(760px 440px at 100% -10%,rgba(16,185,129,.16),transparent 60%),var(--bg)}
   .box{text-align:center;padding:2.5rem 2rem;max-width:440px;width:100%;background:var(--card);border:1px solid var(--border);border-radius:20px;box-shadow:0 30px 70px -22px rgba(8,12,22,.45)}
   .icon{margin-bottom:1rem}
@@ -443,9 +423,8 @@ app.post("/api/connect/:channel/init", apiLimiter, requireAdmin, (req: Request, 
   }
   // Nota: o WhatsApp exige wabaConfigId, mas NÃO bloqueamos aqui — o popup abre e
   // informa o que falta (decisão de UX). Os demais canais não usam config id.
-  const lang = normalizeLang(req.body && req.body.lang);
-  const state = encodeState(channel, appId, lang);
-  res.json({ url: `${PUBLIC_URL}/connect/${channel}?state=${encodeURIComponent(state)}&lang=${lang}` });
+  const state = encodeState(channel, appId);
+  res.json({ url: `${PUBLIC_URL}/connect/${channel}?state=${encodeURIComponent(state)}` });
 });
 
 // Resolve the app from a signed state (used by the signup pages/exchanges).
@@ -453,44 +432,35 @@ function appFromState(stateRaw: string): { state: ReturnType<typeof decodeState>
   const state = decodeState(stateRaw);
   return { state, app: state ? store.findApp(state.appId) : undefined };
 }
-function langOf(req: Request, decoded?: ReturnType<typeof decodeState>): string {
-  return (decoded && decoded.lang) || normalizeLang(req.query.lang as string);
-}
-
 app.get("/connect/waba", (req: Request, res: Response) => {
   const { state, app } = appFromState(String(req.query.state || ""));
-  const lang = langOf(req, state);
-  if (!state || !app) return renderResultPage(res, false, lang, "result.invalidSessionTitle", "result.invalidSessionMsg");
+  if (!state || !app) return renderResultPage(res, false, "result.invalidSessionTitle", "result.invalidSessionMsg");
   serveTemplate(res, "connect-waba.html", {
     APP_ID: app.appId,
     CONFIG_ID: app.wabaConfigId,
     API_VERSION: app.apiVersion,
     STATE: String(req.query.state || ""),
     BRAND_NAME: htmlEscape(getBrand()),
-    LANG: lang,
   });
 });
 
 app.get("/connect/messenger", (req: Request, res: Response) => {
   const { state, app } = appFromState(String(req.query.state || ""));
-  const lang = langOf(req, state);
-  if (!state || !app) return renderResultPage(res, false, lang, "result.invalidSessionTitle", "result.invalidSessionMsg");
+  if (!state || !app) return renderResultPage(res, false, "result.invalidSessionTitle", "result.invalidSessionMsg");
   serveTemplate(res, "connect-messenger.html", {
     APP_ID: app.appId,
     CONFIG_ID: app.messengerConfigId,
     API_VERSION: app.apiVersion,
     STATE: String(req.query.state || ""),
     BRAND_NAME: htmlEscape(getBrand()),
-    LANG: lang,
   });
 });
 
 app.get("/connect/instagram", (req: Request, res: Response) => {
   const { state, app } = appFromState(String(req.query.state || ""));
-  const lang = langOf(req, state);
-  if (!state || !app) return renderResultPage(res, false, lang, "result.invalidSessionTitle", "result.invalidSessionMsg");
+  if (!state || !app) return renderResultPage(res, false, "result.invalidSessionTitle", "result.invalidSessionMsg");
   const ig = instagramCredsFor(app);
-  if (!ig.id) return renderResultPage(res, false, lang, "result.appNotConfiguredTitle", "result.igAppNotConfigured");
+  if (!ig.id) return renderResultPage(res, false, "result.appNotConfiguredTitle", "result.igAppNotConfigured");
   const scopes = ["instagram_business_basic", "instagram_business_manage_messages", "instagram_business_manage_comments"].join(",");
   const authUrl =
     "https://www.instagram.com/oauth/authorize" +
@@ -499,16 +469,15 @@ app.get("/connect/instagram", (req: Request, res: Response) => {
     `&response_type=code` +
     `&scope=${encodeURIComponent(scopes)}` +
     `&state=${encodeURIComponent(String(req.query.state || ""))}`;
-  serveTemplate(res, "connect-instagram.html", { AUTH_URL: authUrl, BRAND_NAME: htmlEscape(getBrand()), LANG: lang });
+  serveTemplate(res, "connect-instagram.html", { AUTH_URL: authUrl, BRAND_NAME: htmlEscape(getBrand()) });
 });
 
 app.get("/connect/instagram/callback", async (req: Request, res: Response) => {
   const { code, state, error, error_description } = req.query as Record<string, string>;
   const { state: decoded, app } = appFromState(String(state || ""));
-  const lang = langOf(req, decoded);
-  if (error) return renderResultPage(res, false, lang, "result.authDeniedTitle", "result.authDeniedMsg", { detail: error_description || error });
-  if (!decoded || !app) return renderResultPage(res, false, lang, "result.invalidSessionTitle", "result.stateMissingMsg");
-  if (!code) return renderResultPage(res, false, lang, "result.codeMissingTitle", "result.codeMissingMsg");
+  if (error) return renderResultPage(res, false, "result.authDeniedTitle", "result.authDeniedMsg", { detail: error_description || error });
+  if (!decoded || !app) return renderResultPage(res, false, "result.invalidSessionTitle", "result.stateMissingMsg");
+  if (!code) return renderResultPage(res, false, "result.codeMissingTitle", "result.codeMissingMsg");
 
   const ig = instagramCredsFor(app);
   try {
@@ -536,10 +505,10 @@ app.get("/connect/instagram/callback", async (req: Request, res: Response) => {
           }
           console.log(`[connect/instagram] fallback token resolved ${igs.length} account(s) app=${app.id}`);
           const names = igs.map((a) => a.username).join(", ");
-          return renderResultPage(res, true, lang, "result.igConnectedTitle", "result.igConnectedMsg", { username: names, app: app.name, sub: tServer(lang, "result.subOk") });
+          return renderResultPage(res, true, "result.igConnectedTitle", "result.igConnectedMsg", { username: names, app: app.name, sub: tServer("result.subOk") });
         }
       }
-      return renderResultPage(res, false, lang, "result.tokenFailTitle", "result.tokenFailMsg");
+      return renderResultPage(res, false, "result.tokenFailTitle", "result.tokenFailMsg");
     }
     const sub = await meta.subscribeInstagramApp(result.accessToken);
     await store.upsertChannel({
@@ -556,11 +525,11 @@ app.get("/connect/instagram/callback", async (req: Request, res: Response) => {
       lastEventAt: null,
     });
     console.log(`[connect/instagram] app=${app.id} ig_user_id=${result.userId} subscribed=${sub.ok}`);
-    const subMsg = sub.ok ? tServer(lang, "result.subOk") : tServer(lang, "result.subFail", { err: sub.error || "" });
-    return renderResultPage(res, true, lang, "result.igConnectedTitle", "result.igConnectedMsg", { username: result.username, app: app.name, sub: subMsg });
+    const subMsg = sub.ok ? tServer("result.subOk") : tServer("result.subFail", { err: sub.error || "" });
+    return renderResultPage(res, true, "result.igConnectedTitle", "result.igConnectedMsg", { username: result.username, app: app.name, sub: subMsg });
   } catch (err: any) {
     console.error("[connect/instagram] error:", err?.message || err);
-    return renderResultPage(res, false, lang, "result.unexpectedTitle", "result.unexpectedMsg");
+    return renderResultPage(res, false, "result.unexpectedTitle", "result.unexpectedMsg");
   }
 });
 
@@ -735,19 +704,18 @@ app.post("/api/connect/messenger/exchange", apiLimiter, async (req: Request, res
 app.get("/embed/connect", apiLimiter, (req: Request, res: Response) => {
   const appId = String(req.query.app || "");
   const channel = String(req.query.channel || "") as ChannelType;
-  const lang = normalizeLang(req.query.lang as string);
   const appCfg = store.findApp(appId);
   if (!appCfg || !appCfg.embedEnabled) {
-    return renderResultPage(res, false, lang, "result.unavailableTitle", "result.unavailableMsg");
+    return renderResultPage(res, false, "result.unavailableTitle", "result.unavailableMsg");
   }
   if (!["waba", "messenger", "instagram"].includes(channel)) {
-    return renderResultPage(res, false, lang, "result.invalidChannelTitle", "result.invalidChannelMsg");
+    return renderResultPage(res, false, "result.invalidChannelTitle", "result.invalidChannelMsg");
   }
   if (!appCfg.appId || !appCfg.appSecret) {
-    return renderResultPage(res, false, lang, "result.appNotConfiguredTitle", "result.appNoSecretMsg");
+    return renderResultPage(res, false, "result.appNotConfiguredTitle", "result.appNoSecretMsg");
   }
-  const state = encodeState(channel, appId, lang);
-  return res.redirect(`${PUBLIC_URL}/connect/${channel}?state=${encodeURIComponent(state)}&lang=${lang}`);
+  const state = encodeState(channel, appId);
+  return res.redirect(`${PUBLIC_URL}/connect/${channel}?state=${encodeURIComponent(state)}`);
 });
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -906,12 +874,11 @@ app.get("/health", (_req: Request, res: Response) => {
   res.json({ status: "ok", uptime: process.uptime(), apps: store.listApps().length, channels: store.listChannels().length });
 });
 
-// i18n dictionary for the browser (single source of truth = locales/*.json).
-app.get("/i18n-data.js", (_req: Request, res: Response) => {
-  reloadLocales(); // re-read locales/*.json so key edits show on refresh (no restart)
+app.get("/texts-data.js", (_req: Request, res: Response) => {
+  reloadTexts();
   res.setHeader("Content-Type", "application/javascript; charset=utf-8");
   res.setHeader("Cache-Control", "no-cache");
-  res.send(localesScript());
+  res.send(textsScript());
 });
 
 app.use(express.static(PUBLIC_DIR));

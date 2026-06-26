@@ -1,16 +1,15 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="pt">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Instagram · HUB RW</title>
+  <title>Instagram Â· HUB RW</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
-  <script src="/i18n-data.js"></script>
-  <script src="/i18n.js"></script>
+  <script src="/texts-data.js"></script>
+  <script src="/texts.js"></script>
   <style>
     *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
     :root{--bg:#f3f4f7;--card:#fff;--text:#0a0d15;--muted:#5b6473;--border:#e7e9f1;--accent:#e1306c;--accentText:#b81e54;--danger:#e5484d}
-    @media (prefers-color-scheme:dark){:root{--bg:#07090f;--card:#11141d;--text:#e9eef7;--muted:#96a0b1;--border:#1f232f;--accentText:#f48cb6}}
     body{font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;padding:1rem;color:var(--text);background:radial-gradient(760px 440px at 100% -10%,rgba(225,48,108,.16),transparent 60%),var(--bg)}
     .box{text-align:center;padding:2.4rem 2rem;max-width:440px;width:100%;background:var(--card);border:1px solid var(--border);border-radius:20px;box-shadow:0 30px 70px -22px rgba(8,12,22,.45)}
     h3{font-size:1.15rem;font-weight:800;letter-spacing:-.02em;margin-bottom:.5rem}
@@ -38,12 +37,10 @@
 
   <script>
     var AUTH_URL = '{{AUTH_URL}}';
-    var LANG     = '{{LANG}}';
-    if (window.I18N && LANG) window.I18N.setLang(LANG);
-    function T(k, v){ return window.I18N ? window.I18N.t(k, v) : k; }
+    function T(k, v){ return window.TEXTS ? window.TEXTS.t(k, v) : k; }
 
     (function initStatic(){
-      document.title = T('cpop.ig.title') + ' · HUB RW';
+      document.title = T('cpop.ig.title') + ' Â· HUB RW';
       document.getElementById('title').textContent = T('cpop.ig.title');
       document.getElementById('msg').textContent = T('cpop.ig.intro');
       document.getElementById('btn').textContent = T('cpop.connectBtn');

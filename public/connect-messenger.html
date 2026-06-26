@@ -1,16 +1,15 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="pt">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Messenger · HUB RW</title>
+  <title>Messenger Â· HUB RW</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
-  <script src="/i18n-data.js"></script>
-  <script src="/i18n.js"></script>
+  <script src="/texts-data.js"></script>
+  <script src="/texts.js"></script>
   <style>
     *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
     :root{--bg:#f3f4f7;--card:#fff;--text:#0a0d15;--muted:#5b6473;--border:#e7e9f1;--accent:#0084ff;--accentText:#0067cc;--danger:#e5484d}
-    @media (prefers-color-scheme:dark){:root{--bg:#07090f;--card:#11141d;--text:#e9eef7;--muted:#96a0b1;--border:#1f232f;--accentText:#6cb6ff}}
     body{font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;padding:1rem;color:var(--text);background:radial-gradient(760px 440px at 100% -10%,rgba(0,132,255,.16),transparent 60%),var(--bg)}
     .box{text-align:center;padding:2.4rem 2rem;max-width:440px;width:100%;background:var(--card);border:1px solid var(--border);border-radius:20px;box-shadow:0 30px 70px -22px rgba(8,12,22,.45)}
     h3{font-size:1.15rem;font-weight:800;letter-spacing:-.02em;margin-bottom:.5rem}
@@ -45,9 +44,7 @@
     var CONFIG_ID   = '{{CONFIG_ID}}';
     var API_VERSION = '{{API_VERSION}}';
     var STATE       = '{{STATE}}';
-    var LANG        = '{{LANG}}';
-    if (window.I18N && LANG) window.I18N.setLang(LANG);
-    function T(k, v){ return window.I18N ? window.I18N.t(k, v) : k; }
+    function T(k, v){ return window.TEXTS ? window.TEXTS.t(k, v) : k; }
 
     function setMsg(t){ document.getElementById('msg').textContent = t; }
     function spinner(on){ document.getElementById('spinner').style.display = on ? 'block':'none'; }
@@ -81,13 +78,13 @@
       var n = pages.length === 1 ? T('cpop.msgr.onePage') : T('cpop.msgr.nPages', { n: pages.length });
       setMsg(n + ' ' + T('cpop.willClose'));
       var l = document.getElementById('list');
-      l.innerHTML = pages.map(function(p){ return '<div>' + p.name + ' — ' + (p.subscribed ? T('cpop.msgr.webhookOk') : T('cpop.msgr.webhookPending')) + '</div>'; }).join('');
+      l.innerHTML = pages.map(function(p){ return '<div>' + p.name + ' â€” ' + (p.subscribed ? T('cpop.msgr.webhookOk') : T('cpop.msgr.webhookPending')) + '</div>'; }).join('');
       notifyOpener(true);
       setTimeout(function(){ try{ window.close(); }catch(e){} }, 2800);
     }
 
     (function initStatic(){
-      document.title = T('cpop.msgr.title') + ' · HUB RW';
+      document.title = T('cpop.msgr.title') + ' Â· HUB RW';
       document.getElementById('title').textContent = T('cpop.msgr.title');
       setMsg(T('common.loading'));
       document.getElementById('btn').textContent = T('cpop.connectBtn');
@@ -143,7 +140,7 @@
       }
     }
 
-    // Classic Facebook Login with explicit Pages scopes — mirrors the oauth-proxy
+    // Classic Facebook Login with explicit Pages scopes â€” mirrors the oauth-proxy
     // flow. Used when no config_id is set, or as a fallback when the config_id
     // returns a WhatsApp/no-Pages token.
     function startClassicLogin(){

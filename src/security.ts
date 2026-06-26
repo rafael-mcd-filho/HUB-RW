@@ -1,20 +1,3 @@
-// HUB RW Meta Hub — standalone hub for Meta channels.
-// Copyright (C) 2026 HUB RW
-//
-// This program is free software: you can redistribute it and/or modify
-// it under the terms of version 3 of the GNU Affero General Public License as
-// published by the Free Software Foundation.
-//
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU Affero General Public License for more details.
-//
-// You should have received a copy of the GNU Affero General Public License
-// along with this program.  If not, see <https://www.gnu.org/licenses/>.
-//
-// Source: https://github.com/hub-rw/hub-rw
-
 // ─────────────────────────────────────────────────────────────────────────────
 // Security primitives: signed tokens (HMAC), OAuth state, panel sessions,
 // webhook signature verification, and the admin-auth middleware.
@@ -64,8 +47,8 @@ function makeToken(payload: Record<string, any>): string {
 
 const STATE_TTL_MS = 30 * 60 * 1000; // 30 min
 
-export function encodeState(channel: ChannelType, appId: string, lang: string): string {
-  return makeToken({ channel, appId, lang: lang || "pt", nonce: crypto.randomBytes(8).toString("hex") });
+export function encodeState(channel: ChannelType, appId: string): string {
+  return makeToken({ channel, appId, nonce: crypto.randomBytes(8).toString("hex") });
 }
 
 export function decodeState(token: string): OAuthState | null {
@@ -73,7 +56,7 @@ export function decodeState(token: string): OAuthState | null {
   if (!data) return null;
   if (data.channel !== "waba" && data.channel !== "messenger" && data.channel !== "instagram") return null;
   if (!data.appId || typeof data.appId !== "string") return null;
-  return { channel: data.channel, appId: data.appId, lang: data.lang || "pt", nonce: data.nonce, iat: data.iat };
+  return { channel: data.channel, appId: data.appId, nonce: data.nonce, iat: data.iat };
 }
 
 // ─── Panel session token ──────────────────────────────────────────────────────
