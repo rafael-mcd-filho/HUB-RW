@@ -65,9 +65,9 @@ function pg(): Pool {
     const ssl = normalizeSslConfig(DATABASE_URL);
     pool = new Pool({
       connectionString: DATABASE_URL,
-      max: Number(process.env.PG_POOL_MAX) || 3,
-      idleTimeoutMillis: 10_000,
-      connectionTimeoutMillis: 10_000,
+      max: Number(process.env.PG_POOL_MAX) || 1,
+      idleTimeoutMillis: 5_000,
+      connectionTimeoutMillis: 8_000,
       ...(ssl === undefined ? {} : { ssl }),
     });
   }
@@ -219,27 +219,24 @@ async function saveEvents(): Promise<void> {
     writeJsonNow("events.json", events);
     return;
   }
+  if (events.length === 0) return;
   const db = pg();
-  await db.query("begin");
-  try {
-    for (const ev of events) {
-      await db.query(
-        `insert into hub_events (id, ts, data)
-         values ($1, $2::timestamptz, $3::jsonb)
-         on conflict (id) do update set ts = excluded.ts, data = excluded.data`,
-        [ev.id, ev.ts, JSON.stringify(ev)]
-      );
-    }
-    await db.query(
-      `delete from hub_events
-       where id not in (select id from hub_events order by ts desc limit $1)`,
-      [EVENTS_MAX]
-    );
-    await db.query("commit");
-  } catch (err) {
-    await db.query("rollback");
-    throw err;
-  }
+  const vals: unknown[] = [];
+  const placeholders = events.map((ev, i) => {
+    const base = i * 3;
+    vals.push(ev.id, ev.ts, JSON.stringify(ev));
+    return `($${base + 1}, $${base + 2}::timestamptz, $${base + 3}::jsonb)`;
+  });
+  await db.query(
+    `insert into hub_events (id, ts, data) values ${placeholders.join(",")}
+     on conflict (id) do update set ts = excluded.ts, data = excluded.data`,
+    vals
+  );
+  await db.query(
+    `delete from hub_events
+     where id not in (select id from hub_events order by ts desc limit $1)`,
+    [EVENTS_MAX]
+  );
 }
 
 export function getSettings(): GlobalSettings {

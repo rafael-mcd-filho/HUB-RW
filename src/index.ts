@@ -85,7 +85,7 @@ async function ensurePrepared(refresh = false): Promise<void> {
 
 app.use(async (_req, res, next) => {
   try {
-    await ensurePrepared(true);
+    await ensurePrepared(false);
     next();
   } catch (err) {
     console.error("[store] initialization failed:", err);
@@ -216,7 +216,8 @@ app.post("/api/settings", apiLimiter, requireAdmin, async (req: Request, res: Re
 // ─────────────────────────────────────────────────────────────────────────────
 // APPS CRUD (admin)
 // ─────────────────────────────────────────────────────────────────────────────
-app.get("/api/apps", apiLimiter, requireAdmin, (_req: Request, res: Response) => {
+app.get("/api/apps", apiLimiter, requireAdmin, async (_req: Request, res: Response) => {
+  await store.refresh();
   res.json({ apps: store.listApps().map(toPublicApp) });
 });
 
@@ -282,7 +283,8 @@ app.delete("/api/apps/:id", apiLimiter, requireAdmin, async (req: Request, res: 
 // ─────────────────────────────────────────────────────────────────────────────
 // CHANNELS / EVENTS (admin)
 // ─────────────────────────────────────────────────────────────────────────────
-app.get("/api/channels", apiLimiter, requireAdmin, (_req: Request, res: Response) => {
+app.get("/api/channels", apiLimiter, requireAdmin, async (_req: Request, res: Response) => {
+  await store.refresh();
   res.json({ channels: store.listChannels().map(toPublicChannel) });
 });
 
@@ -386,7 +388,8 @@ app.post("/api/evidence/run", apiLimiter, requireAdmin, async (req: Request, res
   }
 });
 
-app.get("/api/events", apiLimiter, requireAdmin, (req: Request, res: Response) => {
+app.get("/api/events", apiLimiter, requireAdmin, async (req: Request, res: Response) => {
+  await store.refresh();
   const since = typeof req.query.since === "string" ? req.query.since : undefined;
   const limit = Math.min(200, Number(req.query.limit) || 100);
   res.json({ events: store.listEvents(since, limit) });
@@ -397,7 +400,8 @@ app.post("/api/events/clear", apiLimiter, requireAdmin, async (_req: Request, re
   res.json({ ok: true });
 });
 
-app.get("/api/stats", apiLimiter, requireAdmin, (_req: Request, res: Response) => {
+app.get("/api/stats", apiLimiter, requireAdmin, async (_req: Request, res: Response) => {
+  await store.refresh();
   const channels = store.listChannels();
   const byType: Record<string, number> = { waba: 0, messenger: 0, instagram: 0 };
   let subscribed = 0;
